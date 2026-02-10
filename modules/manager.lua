@@ -273,8 +273,10 @@ RefreshTabs = function(caption, i, tab)
                 end
             end)
         elseif Tabs[caption][tab].saveType == "table" then
+            print(1)
             Tabs[caption][tab].input = pfUI.api.CreateDropDownButton("Config_DropDown_" .. caption .. "_" .. tab,
                 Tabs[caption][tab])
+            print(2)
             Tabs[caption][tab].input:SetBackdrop(nil)
             Tabs[caption][tab].input.menuframe:SetParent(pfExtendConfig)
 
@@ -307,24 +309,24 @@ RefreshTabs = function(caption, i, tab)
             else
                 Tabs[caption][tab].input = CreateFrame("Button", nil, Tabs[caption][tab])
                 Tabs[caption][tab].input:SetPoint("RIGHT", -20, 0)
-                    
+
                 Tabs[caption][tab].input:SetHeight(16)
-                Tabs[caption][tab].input.text = Tabs[caption][tab].input:CreateFontString("Caption", "LOW", "GameFontWhite")
+                Tabs[caption][tab].input.text = Tabs[caption][tab].input:CreateFontString("Caption", "LOW",
+                    "GameFontWhite")
                 Tabs[caption][tab].input.text:SetFont(pfUI.font_default, pfUI_config.global.font_size, "OUTLINE")
                 Tabs[caption][tab].input.text:SetPoint("CENTER", 0, 0)
                 Tabs[caption][tab].input.text:SetText(PfExtend_Config_Template[caption][tab]()["text"])
-                Tabs[caption][tab].input:SetWidth(Tabs[caption][tab].input.text:GetWidth()+20)
-                Tabs[caption][tab].input:SetScript("OnClick",function()
+                Tabs[caption][tab].input:SetWidth(Tabs[caption][tab].input.text:GetWidth() + 20)
+                Tabs[caption][tab].input:SetScript("OnClick", function()
                     this:Disable()
                     local text = PfExtend_Config_Template[caption][tab]()["func"]()
-                    if text then 
+                    if text then
                         this.text:SetText(text)
-                        this:SetWidth(this.text:GetWidth()+20)
+                        this:SetWidth(this.text:GetWidth() + 20)
                     end
                     this:Enable()
                 end)
                 pfUI.api.SkinButton(Tabs[caption][tab].input)
-                
             end
         end
 

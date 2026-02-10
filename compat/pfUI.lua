@@ -6,16 +6,22 @@ if not pfUI then
     ["backdrop"] = {
       bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
       edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-      tile = true, tileSize = 16, edgeSize = 16,
+      tile = true,
+      tileSize = 16,
+      edgeSize = 16,
       insets = { left = 3, right = 3, top = 3, bottom = 3 }
     },
     ["backdrop_small"] = {
-      bgFile = "Interface\\BUTTONS\\WHITE8X8", tile = false, tileSize = 0,
-      edgeFile = "Interface\\BUTTONS\\WHITE8X8", edgeSize = 1,
-      insets = {left = 0, right = 0, top = 0, bottom = 0},
+      bgFile = "Interface\\BUTTONS\\WHITE8X8",
+      tile = false,
+      tileSize = 0,
+      edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+      edgeSize = 1,
+      insets = { left = 0, right = 0, top = 0, bottom = 0 },
     },
     ["font_default"] = STANDARD_TEXT_FONT,
-   }
+
+  }
 
   pfUI_config = {
     ["appearance"] = {
@@ -33,6 +39,10 @@ if not pfUI then
   }
 
   pfUI.api.emulated = true
+end
+
+if not pfUI.media then
+  pfUI.media = { ["img:down"] = pfExtend_Path.."\\compat\\down" }
 end
 
 pfUI.api.SetButtonFont = pfUI.api.SetButtonFont or function(button, font, size, flags)
@@ -70,7 +80,7 @@ pfUI.api.strsplit = pfUI.api.strsplit or function(delimiter, subject)
   if not subject then return nil end
   local delimiter, fields = delimiter or ":", {}
   local pattern = string.format("([^%s]+)", delimiter)
-  string.gsub(subject, pattern, function(c) fields[table.getn(fields)+1] = c end)
+  string.gsub(subject, pattern, function(c) fields[table.getn(fields) + 1] = c end)
   return unpack(fields)
 end
 
@@ -81,13 +91,13 @@ pfUI.api.SanitizePattern = pfUI.api.SanitizePattern or function(pattern, dbg)
     -- escape magic characters
     ret = gsub(ret, "([%+%-%*%(%)%?%[%]%^])", "%%%1")
     -- remove capture indexes
-    ret = gsub(ret, "%d%$","")
+    ret = gsub(ret, "%d%$", "")
     -- catch all characters
-    ret = gsub(ret, "(%%%a)","%(%1+%)")
+    ret = gsub(ret, "(%%%a)", "%(%1+%)")
     -- convert all %s to .+
-    ret = gsub(ret, "%%s%+",".+")
+    ret = gsub(ret, "%%s%+", ".+")
     -- set priority to numbers over strings
-    ret = gsub(ret, "%(.%+%)%(%%d%+%)","%(.-%)%(%%d%+%)")
+    ret = gsub(ret, "%(.%+%)%(%%d%+%)", "%(.-%)%(%%d%+%)")
     -- cache it
     sanitize_cache[pattern] = ret
   end
@@ -95,8 +105,13 @@ pfUI.api.SanitizePattern = pfUI.api.SanitizePattern or function(pattern, dbg)
   return sanitize_cache[pattern]
 end
 
-local er, eg, eb, ea = .4,.4,.4,1
-local br, bg, bb, ba = 0,0,0,1
+pfUI.api.SetAllPointsOffset = pfUI.api.SetAllPointsOffset or function(frame, parent, offset)
+  frame:SetPoint("TOPLEFT", parent, "TOPLEFT", offset, -offset)
+  frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -offset, offset)
+end
+
+local er, eg, eb, ea = .4, .4, .4, 1
+local br, bg, bb, ba = 0, 0, 0, 1
 pfUI.api.CreateBackdrop = pfUI.api.CreateBackdrop or function(f, inset, legacy, transp)
   -- exit if now frame was given
   if not f then return end
@@ -113,13 +128,13 @@ pfUI.api.CreateBackdrop = pfUI.api.CreateBackdrop or function(f, inset, legacy, 
   if legacy then
     f:SetBackdrop(pfUI.backdrop)
     f:SetBackdropColor(br, bg, bb, ba)
-    f:SetBackdropBorderColor(er, eg, eb , ea)
+    f:SetBackdropBorderColor(er, eg, eb, ea)
     return
   end
 
   -- increase clickable area if available
   if f.SetHitRectInsets then
-    f:SetHitRectInsets(-border,-border,-border,-border)
+    f:SetHitRectInsets(-border, -border, -border, -border)
   end
 
   -- use new backdrop behaviour
@@ -129,13 +144,13 @@ pfUI.api.CreateBackdrop = pfUI.api.CreateBackdrop or function(f, inset, legacy, 
     local border = tonumber(border) - 1
     local backdrop = pfUI.backdrop
     if border < 1 then backdrop = pfUI.backdrop_small end
-  	local b = CreateFrame("Frame", nil, f)
-  	b:SetPoint("TOPLEFT", f, "TOPLEFT", -border, border)
-  	b:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", border, -border)
+    local b = CreateFrame("Frame", nil, f)
+    b:SetPoint("TOPLEFT", f, "TOPLEFT", -border, border)
+    b:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", border, -border)
 
     local level = f:GetFrameLevel()
     if level < 1 then
-  	  --f:SetFrameLevel(level + 1)
+      --f:SetFrameLevel(level + 1)
       b:SetFrameLevel(level)
     else
       b:SetFrameLevel(level - 1)
@@ -147,15 +162,15 @@ pfUI.api.CreateBackdrop = pfUI.api.CreateBackdrop or function(f, inset, legacy, 
 
   local b = f.backdrop
   b:SetBackdropColor(br, bg, bb, ba)
-  b:SetBackdropBorderColor(er, eg, eb , ea)
+  b:SetBackdropBorderColor(er, eg, eb, ea)
 end
 
 pfUI.api.SkinArrowButton = pfUI.api.SkinArrowButton or function(button, dir, size)
   if not button then return end
 
-  SkinButton(button)
+  pfUI.api.SkinButton(button)
 
-  button:SetHitRectInsets(-3,-3,-3,-3)
+  button:SetHitRectInsets(-3, -3, -3, -3)
 
   button:SetNormalTexture(nil)
   button:SetPushedTexture(nil)
@@ -170,10 +185,10 @@ pfUI.api.SkinArrowButton = pfUI.api.SkinArrowButton or function(button, dir, siz
   if not button.icon then
     button.icon = button:CreateTexture(nil, "ARTWORK")
     button.icon:SetAlpha(.8)
-    SetAllPointsOffset(button.icon, button, 3)
+    pfUI.api.SetAllPointsOffset(button.icon, button, 3)
   end
 
-  button.icon:SetTexture(pfUI.media["img:"..dir])
+  button.icon:SetTexture(pfUI.media["img:" .. dir])
 
   if not button.pficonfade then
     local button, state = button, nil
@@ -183,9 +198,9 @@ pfUI.api.SkinArrowButton = pfUI.api.SkinArrowButton or function(button, dir, siz
       state = button:IsEnabled()
 
       if state > 0 then
-        button.icon:SetVertexColor(.8,.8,.8,1)
+        button.icon:SetVertexColor(.8, .8, .8, 1)
       else
-        button.icon:SetVertexColor(.2,.2,.2,1)
+        button.icon:SetVertexColor(.2, .2, .2, 1)
       end
     end)
   end
@@ -198,7 +213,7 @@ pfUI.api.SkinButton = pfUI.api.SkinButton or function(button, cr, cg, cb)
   if not cr or not cg or not cb then
     _, class = UnitClass("player")
     local color = RAID_CLASS_COLORS[class]
-    cr, cg, cb = color.r , color.g, color.b
+    cr, cg, cb = color.r, color.g, color.b
   end
   pfUI.api.CreateBackdrop(b, nil, true)
   b:SetNormalTexture(nil)
@@ -210,7 +225,7 @@ pfUI.api.SkinButton = pfUI.api.SkinButton or function(button, cr, cg, cb)
   b:SetScript("OnEnter", function()
     if funce then funce() end
     pfUI.api.CreateBackdrop(b, nil, true)
-    b:SetBackdropBorderColor(cr,cg,cb,1)
+    b:SetBackdropBorderColor(cr, cg, cb, 1)
   end)
   b:SetScript("OnLeave", function()
     if funcl then funcl() end
@@ -230,7 +245,7 @@ pfUI.api.CreateScrollFrame = pfUI.api.CreateScrollFrame or function(name, parent
   f.slider:SetThumbTexture("Interface\\BUTTONS\\WHITE8X8")
   f.slider.thumb = f.slider:GetThumbTexture()
   f.slider.thumb:SetHeight(50)
-  f.slider.thumb:SetTexture(.3,1,.8,.5)
+  f.slider.thumb:SetTexture(.3, 1, .8, .5)
 
   local selfevent = false
   f.slider:SetScript("OnValueChanged", function()
@@ -245,7 +260,7 @@ pfUI.api.CreateScrollFrame = pfUI.api.CreateScrollFrame or function(name, parent
     f.slider:SetMinMaxValues(0, f:GetVerticalScrollRange())
     f.slider:SetValue(f:GetVerticalScroll())
 
-    local m = f:GetHeight()+f:GetVerticalScrollRange()
+    local m = f:GetHeight() + f:GetVerticalScrollRange()
     local v = f:GetHeight()
     local ratio = v / m
 
@@ -278,7 +293,7 @@ pfUI.api.CreateScrollFrame = pfUI.api.CreateScrollFrame or function(name, parent
 
   f:EnableMouseWheel(1)
   f:SetScript("OnMouseWheel", function()
-    this:Scroll(arg1*10)
+    this:Scroll(arg1 * 10)
   end)
 
   return f
@@ -325,24 +340,24 @@ end
 local hexcolor_cache = {}
 pfUI.api.rgbhex = pfUI.api.rgbhex or function(r, g, b, a)
   local key
-  if type(r)=="table" then
-    local _r,_g,_b,_a
+  if type(r) == "table" then
+    local _r, _g, _b, _a
     if r.r then
-      _r,_g,_b,_a = r.r, r.g, r.b, r.a or 1
+      _r, _g, _b, _a = r.r, r.g, r.b, r.a or 1
     elseif table.getn(r) >= 3 then
-      _r,_g,_b,_a = r[1], r[2], r[3], r[4] or 1
+      _r, _g, _b, _a = r[1], r[2], r[3], r[4] or 1
     end
     if _r and _g and _b and _a then
-      key = string.format("%s%s%s%s",_r,_g,_b,_a)
+      key = string.format("%s%s%s%s", _r, _g, _b, _a)
       if hexcolor_cache[key] == nil then
-        hexcolor_cache[key] = string.format("|c%02x%02x%02x%02x", _a*255, _r*255, _g*255, _b*255)
+        hexcolor_cache[key] = string.format("|c%02x%02x%02x%02x", _a * 255, _r * 255, _g * 255, _b * 255)
       end
     end
   elseif tonumber(r) and g and b then
     a = a or 1
-    key = string.format("%s%s%s%s",r,g,b,a)
+    key = string.format("%s%s%s%s", r, g, b, a)
     if hexcolor_cache[key] == nil then
-      hexcolor_cache[key] = string.format("|c%02x%02x%02x%02x", a*255, r*255, g*255, b*255)
+      hexcolor_cache[key] = string.format("|c%02x%02x%02x%02x", a * 255, r * 255, g * 255, b * 255)
     end
   end
   return hexcolor_cache[key] or ""
@@ -355,7 +370,7 @@ local gradientcolors = {}
 pfUI.api.GetColorGradient = pfUI.api.GetColorGradient or function(perc)
   perc = perc > 1 and 1 or perc
   perc = perc < 0 and 0 or perc
-  perc = floor(perc*100)/100
+  perc = floor(perc * 100) / 100
 
   local index = perc
   if not gradientcolors[index] then
@@ -374,7 +389,7 @@ pfUI.api.GetColorGradient = pfUI.api.GetColorGradient or function(perc)
     local r = pfUI.api.round(r1 + (r2 - r1) * perc, 4)
     local g = pfUI.api.round(g1 + (g2 - g1) * perc, 4)
     local b = pfUI.api.round(b1 + (b2 - b1) * perc, 4)
-    local h = pfUI.api.rgbhex(r,g,b)
+    local h = pfUI.api.rgbhex(r, g, b)
 
     gradientcolors[index] = {}
     gradientcolors[index].r = r
@@ -384,9 +399,9 @@ pfUI.api.GetColorGradient = pfUI.api.GetColorGradient or function(perc)
   end
 
   return gradientcolors[index].r,
-    gradientcolors[index].g,
-    gradientcolors[index].b,
-    gradientcolors[index].h
+      gradientcolors[index].g,
+      gradientcolors[index].b,
+      gradientcolors[index].h
 end
 
 
@@ -397,8 +412,8 @@ end
 pfUI.api.GetBestAnchor = pfUI.api.GetBestAnchor or function(self)
   local scale = self:GetScale()
   local x, y = self:GetCenter()
-  local a = GetScreenWidth()  / scale / 3
-  local b = GetScreenWidth()  / scale / 3 * 2
+  local a = GetScreenWidth() / scale / 3
+  local b = GetScreenWidth() / scale / 3 * 2
   local c = GetScreenHeight() / scale / 3 * 2
   local d = GetScreenHeight() / scale / 3
   if not x or not y then return end
@@ -434,31 +449,30 @@ pfUI.api.ConvertFrameAnchor = pfUI.api.ConvertFrameAnchor or function(self, anch
 
   if anchor == "CENTER" then
     x, y = self:GetCenter()
-    x, y = x - GetScreenWidth()/2/scale, y - GetScreenHeight()/2/scale
+    x, y = x - GetScreenWidth() / 2 / scale, y - GetScreenHeight() / 2 / scale
   elseif anchor == "TOPLEFT" then
-    x, y = self:GetLeft(), self:GetTop() - GetScreenHeight()/scale
+    x, y = self:GetLeft(), self:GetTop() - GetScreenHeight() / scale
   elseif anchor == "TOP" then
     x, _ = self:GetCenter()
-    x, y = x - GetScreenWidth()/2/scale, self:GetTop() - GetScreenHeight()/scale
+    x, y = x - GetScreenWidth() / 2 / scale, self:GetTop() - GetScreenHeight() / scale
   elseif anchor == "TOPRIGHT" then
-    x, y = self:GetRight() - GetScreenWidth()/scale, self:GetTop() - GetScreenHeight()/scale
+    x, y = self:GetRight() - GetScreenWidth() / scale, self:GetTop() - GetScreenHeight() / scale
   elseif anchor == "RIGHT" then
     _, y = self:GetCenter()
-    x, y = self:GetRight() - GetScreenWidth()/scale, y - GetScreenHeight()/2/scale
+    x, y = self:GetRight() - GetScreenWidth() / scale, y - GetScreenHeight() / 2 / scale
   elseif anchor == "BOTTOMRIGHT" then
-    x, y = self:GetRight() - GetScreenWidth()/scale, self:GetBottom()
+    x, y = self:GetRight() - GetScreenWidth() / scale, self:GetBottom()
   elseif anchor == "BOTTOM" then
     x, _ = self:GetCenter()
-    x, y = x - GetScreenWidth()/2/scale, self:GetBottom()
+    x, y = x - GetScreenWidth() / 2 / scale, self:GetBottom()
   elseif anchor == "BOTTOMLEFT" then
     x, y = self:GetLeft(), self:GetBottom()
   elseif anchor == "LEFT" then
     _, y = self:GetCenter()
-    x, y = self:GetLeft(), y - GetScreenHeight()/2/scale
+    x, y = self:GetLeft(), y - GetScreenHeight() / 2 / scale
   end
 
   return anchor, pfUI.api.round(x, 2), pfUI.api.round(y, 2)
-
 end
 
 if pfUI.api.CreateDropDownButton == nil then
@@ -510,11 +524,11 @@ if pfUI.api.CreateDropDownButton == nil then
   end
 
   local function ListButtonOnEnter()
-    this.button:SetBackdropBorderColor(this.button.cr,this.button.cg,this.button.cb,(this.button.ca or 1))
+    this.button:SetBackdropBorderColor(this.button.cr, this.button.cg, this.button.cb, (this.button.ca or 1))
   end
 
   local function ListButtonOnLeave()
-    this.button:SetBackdropBorderColor(this.button.rr,this.button.rg,this.button.rb,(this.button.ra or 1))
+    this.button:SetBackdropBorderColor(this.button.rr, this.button.rg, this.button.rb, (this.button.ra or 1))
   end
 
   local handlers = {
@@ -558,7 +572,7 @@ if pfUI.api.CreateDropDownButton == nil then
     ["ShowMenu"] = function(self)
       self:UpdateMenu()
       self.menuframe:SetFrameLevel(self:GetFrameLevel() + 8)
-      self.menuframe:SetHeight(table.getn(self.menu)*20+4)
+      self.menuframe:SetHeight(table.getn(self.menu) * 20 + 4)
       self.menuframe:Show()
     end,
     ["HideMenu"] = function(self)
@@ -605,8 +619,8 @@ if pfUI.api.CreateDropDownButton == nil then
         frame = CreateFrame("Button", nil, self.menuframe)
         frame:SetFrameStrata("FULLSCREEN")
         frame:ClearAllPoints()
-        frame:SetPoint("TOPLEFT", self.menuframe, "TOPLEFT", 2, -(entry-1)*20-2)
-        frame:SetPoint("TOPRIGHT", self.menuframe, "TOPRIGHT", -2, -(entry-1)*20-2)
+        frame:SetPoint("TOPLEFT", self.menuframe, "TOPLEFT", 2, -(entry - 1) * 20 - 2)
+        frame:SetPoint("TOPRIGHT", self.menuframe, "TOPRIGHT", -2, -(entry - 1) * 20 - 2)
         frame:SetHeight(20)
         frame.parent = self
 
@@ -618,14 +632,14 @@ if pfUI.api.CreateDropDownButton == nil then
 
         frame.text = frame:CreateFontString(nil, "OVERLAY")
         frame.text:SetFontObject(GameFontWhite)
-        frame.text:SetFont(pfUI.font_default, pfUI_config.global.font_size-1, "OUTLINE")
+        frame.text:SetFont(pfUI.font_default, pfUI_config.global.font_size - 1, "OUTLINE")
         frame.text:SetJustifyH("RIGHT")
         frame.text:SetPoint("LEFT", frame, "LEFT", 2, 0)
         frame.text:SetPoint("RIGHT", frame.icon, "LEFT", -2, 0)
 
         frame.hover = frame:CreateTexture(nil, "BACKGROUND")
         frame.hover:SetAllPoints(frame)
-        frame.hover:SetTexture(.4,.4,.4,.4)
+        frame.hover:SetTexture(.4, .4, .4, .4)
         frame.hover:Hide()
 
         table.insert(self.menuframe.elements, frame)
@@ -634,7 +648,7 @@ if pfUI.api.CreateDropDownButton == nil then
       frame.id = id
       frame.text:SetText(self.menu[id].text)
 
-      frame:SetScript("OnShow",  ListEntryOnShow)
+      frame:SetScript("OnShow", ListEntryOnShow)
       frame:SetScript("OnClick", ListEntryOnClick)
       frame:SetScript("OnEnter", ListEntryOnEnter)
       frame:SetScript("OnLeave", ListEntryOnLeave)
@@ -657,15 +671,15 @@ if pfUI.api.CreateDropDownButton == nil then
     button:SetHeight(16)
     button:SetScript("OnClick", ListButtonOnClick)
     pfUI.api.SkinArrowButton(button, "down")
-    button.icon:SetVertexColor(1,.9,.1)
+    button.icon:SetVertexColor(1, .9, .1)
 
     local text = frame:CreateFontString(nil, "OVERLAY")
     text:SetFontObject(GameFontWhite)
-    text:SetFont(pfUI.font_default, pfUI_config.global.font_size-1, "OUTLINE")
+    text:SetFont(pfUI.font_default, pfUI_config.global.font_size - 1, "OUTLINE")
     text:SetPoint("RIGHT", button, "LEFT", -4, 0)
     text:SetJustifyH("RIGHT")
 
-    local menuframe = CreateFrame("Frame", tostring(frame).."menu", parent)
+    local menuframe = CreateFrame("Frame", tostring(frame) .. "menu", parent)
     menuframe.button = frame
     menuframe.elements = {}
     menuframe:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, -2)

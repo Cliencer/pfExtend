@@ -60,19 +60,17 @@ jobs:
       shell: pwsh
       run: |
         Get-ChildItem -Filter "*.zip"
-    
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: pfExtend-release
-        path: pfExtend_*.zip
-    
+
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: pfExtend_*.zip
-        name: pfExtend ${{ steps.get_version.outputs.version }}
-        generate_release_notes: true
+      id: create_release
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        files: pfExtend_*.zip
+        name: pfExtend ${{ steps.get_version.outputs.version }}
+        prerelease: false
+        make_latest: true
+        generate_release_notes: true
+      

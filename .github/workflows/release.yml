@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Extract version from pfExtend.toc
+      id: get_version
+      shell: pwsh
+      run: |
+        $tocContent = Get-Content "src/pfExtend.toc" -Raw
+        if ($tocContent -match '## Version:\s*([^\s]+)') {
+          $version = $matches[1]
+          Write-Output "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Output "Detected version: $version"
+        } else {
+          Write-Error "Could not find version in pfExtend.toc"
+          exit 1
+        }
+    
+    - name: Create zip archive
+      shell: pwsh
+      run: |
+        $version = "${{ steps.get_version.outputs.version }}"
+        $zipName = "pfExtend_$version.zip"
+        
+        # Create temp folder structure: temp_pfExtend/pfExtend/
+        $tempDir = "temp_pfExtend"
+        $finalDir = "$tempDir\pfExtend"
+        New-Item -ItemType Directory -Force -Path $finalDir | Out-Null
+        
+        # Copy src contents to final folder
+        Copy-Item -Path "src\*" -Destination $finalDir -Recurse -Force
+        
+        # Create zip file from temp folder (includes pfExtend subfolder)
+        Compress-Archive -Path "$tempDir\pfExtend" -DestinationPath $zipName -Force
+        
+        # Cleanup
+        Remove-Item -Recurse -Force $tempDir
+        
+        Write-Output "Created: $zipName"
+        if (Test-Path $zipName) {
+          Write-Output "Zip file exists with size: $((Get-Item $zipName).Length) bytes"
+        }
+    
+    - name: List files
+      shell: pwsh
+      run: |
+        Get-ChildItem -Filter "*.zip"
+
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        files: pfExtend_*.zip
+        name: pfExtend ${{ steps.get_version.outputs.version }}
+        prerelease: false
+        make_latest: true
+        generate_release_notes: true
+      

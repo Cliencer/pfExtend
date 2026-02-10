@@ -1,0 +1,15 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Include file="..\modules\manager.lua"/>
+
+
+  <Include file="..\modules\About\config.lua"/>
+
+  <Include file="..\modules\ShowLoots\config.lua"/>
+  <Include file="..\modules\ShowLoots\main.lua"/>
+  <Include file="..\modules\ShowLoots\browser.lua"/>
+
+  <Include file="..\modules\QuestHelper\config.lua"/>
+  <Include file="..\modules\QuestHelper\main.lua"/>
+  <Include file="..\modules\QuestHelper\browser.lua"/>
+
+</Ui>

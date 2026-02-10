@@ -1,0 +1,8 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Include file="..\locales\locales_enUS.lua"/>
+  
+  <Include file="..\locales\locales_zhCN.lua"/>
+
+
+  <Include file="..\locales\manager.lua"/>
+</Ui>

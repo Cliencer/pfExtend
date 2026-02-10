@@ -37,21 +37,29 @@ jobs:
         $version = "${{ steps.get_version.outputs.version }}"
         $zipName = "pfExtend_$version.zip"
         
-        # Create temp folder with correct name
+        # Create temp folder structure: temp_pfExtend/pfExtend/
         $tempDir = "temp_pfExtend"
-        New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+        $finalDir = "$tempDir\pfExtend"
+        New-Item -ItemType Directory -Force -Path $finalDir | Out-Null
         
-        # Copy src contents to temp folder with new name
-        Copy-Item -Path "src\*" -Destination "$tempDir\pfExtend" -Recurse -Force
+        # Copy src contents to final folder
+        Copy-Item -Path "src\*" -Destination $finalDir -Recurse -Force
         
-        # Create zip file
+        # Create zip file from temp folder (includes pfExtend subfolder)
         Compress-Archive -Path "$tempDir\pfExtend" -DestinationPath $zipName -Force
         
         # Cleanup
         Remove-Item -Recurse -Force $tempDir
         
         Write-Output "Created: $zipName"
-        Test-Path $zipName
+        if (Test-Path $zipName) {
+          Write-Output "Zip file exists with size: $((Get-Item $zipName).Length) bytes"
+        }
+    
+    - name: List files
+      shell: pwsh
+      run: |
+        Get-ChildItem -Filter "*.zip"
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4

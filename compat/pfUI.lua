@@ -150,6 +150,47 @@ pfUI.api.CreateBackdrop = pfUI.api.CreateBackdrop or function(f, inset, legacy, 
   b:SetBackdropBorderColor(er, eg, eb , ea)
 end
 
+pfUI.api.SkinArrowButton = pfUI.api.SkinArrowButton or function(button, dir, size)
+  if not button then return end
+
+  SkinButton(button)
+
+  button:SetHitRectInsets(-3,-3,-3,-3)
+
+  button:SetNormalTexture(nil)
+  button:SetPushedTexture(nil)
+  button:SetHighlightTexture(nil)
+  button:SetDisabledTexture(nil)
+
+  if size then
+    button:SetWidth(size)
+    button:SetHeight(size)
+  end
+
+  if not button.icon then
+    button.icon = button:CreateTexture(nil, "ARTWORK")
+    button.icon:SetAlpha(.8)
+    SetAllPointsOffset(button.icon, button, 3)
+  end
+
+  button.icon:SetTexture(pfUI.media["img:"..dir])
+
+  if not button.pficonfade then
+    local button, state = button, nil
+    button.pficonfade = CreateFrame("Frame", nil, button)
+    button.pficonfade:SetScript("OnUpdate", function()
+      if state == button:IsEnabled() then return end
+      state = button:IsEnabled()
+
+      if state > 0 then
+        button.icon:SetVertexColor(.8,.8,.8,1)
+      else
+        button.icon:SetVertexColor(.2,.2,.2,1)
+      end
+    end)
+  end
+end
+
 pfUI.api.SkinButton = pfUI.api.SkinButton or function(button, cr, cg, cb)
   local b = getglobal(button)
   if not b then b = button end
@@ -417,4 +458,230 @@ pfUI.api.ConvertFrameAnchor = pfUI.api.ConvertFrameAnchor or function(self, anch
   end
 
   return anchor, pfUI.api.round(x, 2), pfUI.api.round(y, 2)
+
+end
+
+if pfUI.api.CreateDropDownButton == nil then
+  local _, class = UnitClass("player")
+  local color = RAID_CLASS_COLORS[class]
+
+  local function ListEntryOnShow()
+    if this.parent.id == this.id then
+      this.icon:Show()
+    else
+      this.icon:Hide()
+    end
+  end
+
+  local function ListEntryOnClick()
+    this.parent:SetSelection(this.id)
+
+    if this.parent.mode == "MULTISELECT" then
+      this.parent:ShowMenu()
+    else
+      this.parent:HideMenu()
+    end
+
+    if this.parent.menu[this.id].func then
+      this.parent.menu[this.id].func()
+    end
+  end
+
+  local function ListEntryOnEnter()
+    this.hover:Show()
+  end
+
+  local function ListEntryOnLeave()
+    this.hover:Hide()
+  end
+
+  local function ListButtonOnClick()
+    if this.ToggleMenu then
+      this:ToggleMenu()
+    else
+      this:GetParent():ToggleMenu()
+    end
+  end
+
+  local function MenuOnUpdate()
+    if not MouseIsOver(this, 100, -100, -100, 100) then
+      this.button:HideMenu()
+    end
+  end
+
+  local function ListButtonOnEnter()
+    this.button:SetBackdropBorderColor(this.button.cr,this.button.cg,this.button.cb,(this.button.ca or 1))
+  end
+
+  local function ListButtonOnLeave()
+    this.button:SetBackdropBorderColor(this.button.rr,this.button.rg,this.button.rb,(this.button.ra or 1))
+  end
+
+  local handlers = {
+    ["SetSelection"] = function(self, id)
+      if id and self.menu and self.menu[id] then
+        self.text:SetText(self.menu[id].text)
+        self.id = id
+      end
+    end,
+    ["SetSelectionByText"] = function(self, name)
+      self:UpdateMenu()
+      for id, entry in pairs(self.menu) do
+        if entry.text == name then
+          self:SetSelection(id)
+          return true
+        end
+      end
+
+      self.text:SetText(name)
+      return nil
+    end,
+    ["GetSelection"] = function(self)
+      self:UpdateMenu()
+      if self.menu and self.menu[self.id] then
+        return self.id, self.menu[self.id].text, self.menu[self.id].func
+      end
+    end,
+    ["SetMenu"] = function(self, menu)
+      if type(menu) == "function" then
+        self.menu = menu()
+        self.menufunc = menu
+      else
+        self.menu = menu
+        self.menufunc = nil
+      end
+    end,
+    ["GetMenu"] = function(self)
+      self:UpdateMenu()
+      return self.menu
+    end,
+    ["ShowMenu"] = function(self)
+      self:UpdateMenu()
+      self.menuframe:SetFrameLevel(self:GetFrameLevel() + 8)
+      self.menuframe:SetHeight(table.getn(self.menu)*20+4)
+      self.menuframe:Show()
+    end,
+    ["HideMenu"] = function(self)
+      self.menuframe:Hide()
+    end,
+    ["ToggleMenu"] = function(self)
+      if self.menuframe:IsShown() then
+        self:HideMenu()
+      else
+        self:ShowMenu()
+      end
+    end,
+    ["UpdateMenu"] = function(self)
+      -- run/reload menu function if available
+      if self.menufunc then self.menu = self.menufunc() end
+      if not self.menu then return end
+
+      -- set caption to the current value
+      self.text:SetText(self.menu[self.id] and self.menu[self.id].text or "")
+
+      -- refresh menu buttons
+      for id, element in pairs(self.menuframe.elements) do
+        element:Hide()
+      end
+
+      for id, data in pairs(self.menu) do
+        self:CreateMenuEntry(id)
+      end
+    end,
+    ["CreateMenuEntry"] = function(self, id)
+      if not self.menu[id] then return end
+
+      local frame, entry
+      for count, existing in pairs(self.menuframe.elements) do
+        if not existing:IsShown() then
+          frame = existing
+          entry = count
+          break
+        end
+      end
+
+      if not frame and not entry then
+        entry = table.getn(self.menuframe.elements) + 1
+        frame = CreateFrame("Button", nil, self.menuframe)
+        frame:SetFrameStrata("FULLSCREEN")
+        frame:ClearAllPoints()
+        frame:SetPoint("TOPLEFT", self.menuframe, "TOPLEFT", 2, -(entry-1)*20-2)
+        frame:SetPoint("TOPRIGHT", self.menuframe, "TOPRIGHT", -2, -(entry-1)*20-2)
+        frame:SetHeight(20)
+        frame.parent = self
+
+        frame.icon = frame:CreateTexture(nil, "OVERLAY")
+        frame.icon:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
+        frame.icon:SetHeight(16)
+        frame.icon:SetWidth(16)
+        frame.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+
+        frame.text = frame:CreateFontString(nil, "OVERLAY")
+        frame.text:SetFontObject(GameFontWhite)
+        frame.text:SetFont(pfUI.font_default, pfUI_config.global.font_size-1, "OUTLINE")
+        frame.text:SetJustifyH("RIGHT")
+        frame.text:SetPoint("LEFT", frame, "LEFT", 2, 0)
+        frame.text:SetPoint("RIGHT", frame.icon, "LEFT", -2, 0)
+
+        frame.hover = frame:CreateTexture(nil, "BACKGROUND")
+        frame.hover:SetAllPoints(frame)
+        frame.hover:SetTexture(.4,.4,.4,.4)
+        frame.hover:Hide()
+
+        table.insert(self.menuframe.elements, frame)
+      end
+
+      frame.id = id
+      frame.text:SetText(self.menu[id].text)
+
+      frame:SetScript("OnShow",  ListEntryOnShow)
+      frame:SetScript("OnClick", ListEntryOnClick)
+      frame:SetScript("OnEnter", ListEntryOnEnter)
+      frame:SetScript("OnLeave", ListEntryOnLeave)
+      frame:Show()
+    end,
+  }
+  function pfUI.api.CreateDropDownButton(name, parent)
+    local frame = CreateFrame("Button", name, parent)
+    frame:SetScript("OnEnter", ListButtonOnEnter)
+    frame:SetScript("OnLeave", ListButtonOnLeave)
+    frame:SetScript("OnClick", ListButtonOnClick)
+    frame:SetHeight(20)
+    frame.id = nil
+
+    pfUI.api.CreateBackdrop(frame, nil, true)
+
+    local button = CreateFrame("Button", nil, frame)
+    button:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
+    button:SetWidth(16)
+    button:SetHeight(16)
+    button:SetScript("OnClick", ListButtonOnClick)
+    pfUI.api.SkinArrowButton(button, "down")
+    button.icon:SetVertexColor(1,.9,.1)
+
+    local text = frame:CreateFontString(nil, "OVERLAY")
+    text:SetFontObject(GameFontWhite)
+    text:SetFont(pfUI.font_default, pfUI_config.global.font_size-1, "OUTLINE")
+    text:SetPoint("RIGHT", button, "LEFT", -4, 0)
+    text:SetJustifyH("RIGHT")
+
+    local menuframe = CreateFrame("Frame", tostring(frame).."menu", parent)
+    menuframe.button = frame
+    menuframe.elements = {}
+    menuframe:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, -2)
+    menuframe:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 2)
+    menuframe:SetScript("OnUpdate", MenuOnUpdate)
+    menuframe:Hide()
+    pfUI.api.CreateBackdrop(menuframe, nil, true)
+
+    for name, func in pairs(handlers) do
+      frame[name] = func
+    end
+
+    frame.menuframe = menuframe
+    frame.button = button
+    frame.text = text
+
+    return frame
+  end
 end

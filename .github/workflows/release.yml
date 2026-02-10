@@ -21,7 +21,7 @@ jobs:
       id: get_version
       shell: pwsh
       run: |
-        $tocContent = Get-Content "src/pfExtend.toc" -Raw
+        $tocContent = Get-Content "pfExtend.toc" -Raw
         if ($tocContent -match '## Version:\s*([^\s]+)') {
           $version = $matches[1]
           Write-Output "version=$version" >> $env:GITHUB_OUTPUT
@@ -37,13 +37,46 @@ jobs:
         $version = "${{ steps.get_version.outputs.version }}"
         $zipName = "pfExtend_$version.zip"
         
+        # Define excluded files and folders
+        $excludedFiles = @('.gitattributes', '.gitignore', 'LICENSE', 'README.md', 'README-zhCN.md')
+        $excludedFolders = @('img', '.git', '.github')
+        
         # Create temp folder structure: temp_pfExtend/pfExtend/
         $tempDir = "temp_pfExtend"
         $finalDir = "$tempDir\pfExtend"
         New-Item -ItemType Directory -Force -Path $finalDir | Out-Null
         
-        # Copy src contents to final folder
-        Copy-Item -Path "src\*" -Destination $finalDir -Recurse -Force
+        # Get all items in root directory
+        $items = Get-ChildItem -Path "." -Force
+        
+        foreach ($item in $items) {
+          $name = $item.Name
+          
+          # Skip excluded files
+          if ($excludedFiles -contains $name) {
+            Write-Output "Excluding file: $name"
+            continue
+          }
+          
+          # Skip excluded folders
+          if ($excludedFolders -contains $name) {
+            Write-Output "Excluding folder: $name"
+            continue
+          }
+          
+          # Skip temp directory itself
+          if ($name -eq $tempDir) {
+            continue
+          }
+          
+          # Copy to final directory
+          $destPath = Join-Path $finalDir $name
+          if ($item.PSIsContainer) {
+            Copy-Item -Path $item.FullName -Destination $destPath -Recurse -Force
+          } else {
+            Copy-Item -Path $item.FullName -Destination $destPath -Force
+          }
+        }
         
         # Create zip file from temp folder (includes pfExtend subfolder)
         Compress-Archive -Path "$tempDir\pfExtend" -DestinationPath $zipName -Force
@@ -73,4 +106,3 @@ jobs:
         prerelease: false
         make_latest: true
         generate_release_notes: true
-      

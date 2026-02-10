@@ -49,8 +49,9 @@ professions = pfDB["professions"]["loc"]
 PFEXQuestHelper.Browser = CreateFrame("Frame", "QuestHelperBrowser", WorldMapFrame)
 PFEXQuestHelper.Browser:Hide()
 PFEXQuestHelper.Browser:SetWidth(500)
-PFEXQuestHelper.Browser:SetHeight(WorldMapFrame:GetHeight())
+-- PFEXQuestHelper.Browser:SetHeight(WorldMapFrame:GetHeight())
 PFEXQuestHelper.Browser:SetPoint("TOPLEFT", WorldMapFrame, "TOPRIGHT", 0, 0)
+PFEXQuestHelper.Browser:SetPoint("BOTTOMLEFT", WorldMapFrame, "BOTTOMRIGHT", 0, 0)
 PFEXQuestHelper.Browser:SetFrameStrata("FULLSCREEN_DIALOG")
 
 PFEXQuestHelper.Browser:SetScript("OnHide", function()

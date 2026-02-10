@@ -5,7 +5,8 @@
 ## Notes: Display all monster drops, query the task chain. This module is based on pfQuest. Command: /pfex
 ## Title-zhCN:|CFF33AAFF[辅助]|RpfQuest扩展
 ## Notes-zhCN: 显示怪物全部掉落，任务链查询|N命令：/pfex
-## Dependencies: pfUI,pfQuest
+## Dependencies: pfQuest
+## OptionalDeps: pfUI
 ## SavedVariables: PfExtend_Database, PfExtend_Config
 init\compat.xml
 init\locales.xml

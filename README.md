@@ -2,7 +2,7 @@
 
 English | [简体中文](README-zhCN.md)
 
-pfExtend is an extension addon for [pfQuest](https://github.com/shagu/pfQuest) and [pfUI](https://github.com/shagu/pfUI), enhancing the gameplay experience by providing monster loot display and quest chain visualization functionalities. Compatible with **Turtle WoW** (1.12.0 client).
+pfExtend is an extension addon for [pfQuest](https://github.com/shagu/pfQuest), enhancing the gameplay experience by providing monster loot display and quest chain visualization functionalities. Compatible with **Turtle WoW** (1.12.0 client).
 
 ## Features
 
@@ -90,9 +90,9 @@ A powerful quest chain visualization tool integrated into the World Map.
 
 ## Dependencies
 
-- **[pfUI](https://github.com/shagu/pfUI)** - Required UI framework
 - **[pfQuest](https://github.com/shagu/pfQuest)** - Required database provider
 - **[pfQuest-turtle](https://github.com/shagu/pfQuest-turtle)** - Additional database for Turtle WoW (required only for Turtle WoW)
+- **[pfUI](https://github.com/shagu/pfUI)** - Recommended UI framework (optional)
 
 ## Installation
 
@@ -125,7 +125,7 @@ Both features require a one-time database initialization:
 ## Compatibility
 
 - **Client**: World of Warcraft 1.12.0 (Vanilla), compatible with **Turtle WoW**
-- **Dependencies**: pfUI, pfQuest (and pfQuest-turtle for Turtle WoW)
+- **Dependencies**: pfQuest (and pfQuest-turtle for Turtle WoW), pfUI(optional)
 - **Conflicts**: None known
 
 ## Credits

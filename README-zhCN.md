@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest) 和 [pfUI](https://github.com/shagu/pfUI) 的扩展插件，提供怪物掉落显示和任务链可视化功能。兼容 **Turtle WoW**（1.12.0 客户端）。
+pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供怪物掉落显示和任务链可视化功能。兼容 **Turtle WoW**（1.12.0 客户端）。
 
 ## 功能特性
 
@@ -93,9 +93,9 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest) 和 [pfUI](https://gith
 
 ## 依赖插件
 
-- **[pfUI](https://github.com/shagu/pfUI)** - 必需的 UI 框架
 - **[pfQuest](https://github.com/shagu/pfQuest)** - 必需的数据库提供插件
 - **[pfQuest-turtle](https://github.com/shagu/pfQuest-turtle)** - Turtle WoW 的额外数据库（仅 Turtle WoW 需要）
+- **[pfUI](https://github.com/shagu/pfUI)** - 推荐的 UI 框架（可选）
 
 ## 安装方法
 
@@ -128,7 +128,7 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest) 和 [pfUI](https://gith
 ## 兼容性
 
 - **客户端**：魔兽世界 1.12.0（经典版），兼容 **Turtle WoW**
-- **依赖**：pfUI、pfQuest（Turtle WoW 还需 pfQuest-turtle）
+- **依赖**：pfQuest（Turtle WoW 还需 pfQuest-turtle）、pfUI（可选）
 - **冲突**：无已知冲突
 
 ## 其它

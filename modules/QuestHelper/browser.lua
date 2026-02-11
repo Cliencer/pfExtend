@@ -358,7 +358,7 @@ function PFEXQuestHelper.Browser:CreateNode(data, parentNode, level, pooledFrame
     button:SetScript("OnClick", function()
         if IsControlKeyDown() and node.clickType == "FINDPRE" then
             local preId, preZone = PFEXQuestHelper.FindPreUndo(node.data.id)
-            print(preZone)
+
             PFEXQuestHelper.expandToId = data.id
             pfMap:SetMapByID(preZone)
         elseif node.clickType == "OTHERZONE" then
@@ -400,7 +400,6 @@ function PFEXQuestHelper.Browser:CreateNode(data, parentNode, level, pooledFrame
         GameTooltip:SetWidth(20 + width);
         if not node.mapNode then
             for i, pin in pairs(PFEXQuestHelper.pins) do
-                --print(pin.title)
                 if pin.title == node.mapNodeTitle then
                     pin:Show()
                 end

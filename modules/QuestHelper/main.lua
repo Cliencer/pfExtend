@@ -108,6 +108,7 @@ PFEXQuestHelper.QuestFilter = function(id)
         STARTOBJECT = false,   --从实体单位接取
         STARTITEM = false,     --从物品接取
     }
+    
     if quests[id]["lvl"] then ret.lvl = quests[id]["lvl"] end
     if quests[id]["min"] then ret.min = quests[id]["min"] end
     if pfQuest.questlog[id] then ret.DOING = true end
@@ -346,6 +347,7 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
 
     -- 构建树结构
     local function BuildNode(id)
+    
         if processed[id] then
             return nil
         end

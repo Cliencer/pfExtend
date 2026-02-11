@@ -274,10 +274,8 @@ RefreshTabs = function(caption, i, tab)
                 end
             end)
         elseif Tabs[caption][tab].saveType == "table" then
-            print(1)
             Tabs[caption][tab].input = pfUI.api.CreateDropDownButton("Config_DropDown_" .. caption .. "_" .. tab,
                 Tabs[caption][tab])
-            print(2)
             Tabs[caption][tab].input:SetBackdrop(nil)
             Tabs[caption][tab].input.menuframe:SetParent(pfExtendConfig)
 

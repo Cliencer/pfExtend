@@ -157,6 +157,7 @@ end
 
 CreateTabsWindow = function(fname)
     if not pfExtendConfig.tabs then pfExtendConfig.tabs = {} end
+    if pfExtendConfig.tabs[fname] then return end
     pfExtendConfig.tabs[fname] = pfUI.api.CreateScrollFrame("pfExtendConfig" .. fname, pfExtendConfig)
     pfExtendConfig.tabs[fname]:SetPoint("TOPLEFT", pfExtendConfig, "TOP", -80, -40)
     pfExtendConfig.tabs[fname]:SetPoint("BOTTOMRIGHT", pfExtendConfig, "BOTTOMRIGHT", -10, 10)

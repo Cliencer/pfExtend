@@ -18,8 +18,6 @@ PFEXQuestHelper = {
 
 
 
-
-
 local items, units, objects, quests, zones, refloot, itemreq, areatrigger, professions
 PFEXQuestHelper.Reload = function()
     items = pfDB["items"]["data"]

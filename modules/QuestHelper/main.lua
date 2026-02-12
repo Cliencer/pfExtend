@@ -75,7 +75,7 @@ PFEXQuestHelper.FindPreUndo = function(id)
                     thislevel = 3
                 end
             end
-            if thislevel>level then
+            if thislevel > level then
                 one_complete = prequest
                 level = thislevel
             end
@@ -108,7 +108,7 @@ PFEXQuestHelper.QuestFilter = function(id)
         STARTOBJECT = false,   --从实体单位接取
         STARTITEM = false,     --从物品接取
     }
-    
+
     if quests[id]["lvl"] then ret.lvl = quests[id]["lvl"] end
     if quests[id]["min"] then ret.min = quests[id]["min"] end
     if pfQuest.questlog[id] then ret.DOING = true end
@@ -314,10 +314,16 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
     local processed = {}
     local roots = {}
     local hasParent = {}
-
+    local hide = {
+        class = PfExtend_Global.ReadSetting("QuestHelper", "hideClass"),
+        race = PfExtend_Global.ReadSetting("QuestHelper", "hideRace"),
+        skill = PfExtend_Global.ReadSetting("QuestHelper", "hideSkill"),
+        event = PfExtend_Global.ReadSetting("QuestHelper", "hideEvent")
+    }
     -- 第一遍：标记父节点
     local function MarkParents(id)
         if processed[id] then return end
+
         processed[id] = true
 
         local after = QuestAfter[id]
@@ -347,7 +353,6 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
 
     -- 构建树结构
     local function BuildNode(id)
-    
         if processed[id] then
             return nil
         end
@@ -359,7 +364,10 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
             flag = PFEXQuestHelper.QuestFilter(id),
             children = {},
         }
-
+        if node.flag.WRONGCLASS and hide.class then return nil end
+        if node.flag.WRONGRACE and hide.race then return nil end
+        if node.flag.WRONGSKILL and hide.skill then return nil end
+        if node.flag.EVENT and hide.event then return nil end
         local after = QuestAfter[id]
         if after then
             for _, nextId in ipairs(after) do
@@ -558,7 +566,7 @@ PFEXQuestHelper.OnEvent = function(event, arg1, arg2, arg3, arg4, arg5, arg6, ar
     if (event == "PLAYER_ENTERING_WORLD") then
         PFEXQuestHelper.Reload()
         PFEXQuestHelper.GetPlayerData()
-        if PfExtend_Database["QuestHelper"]["updated"] ~= true or PfExtend_Database["QuestHelper"]["version"] ~= PfExtend_Config_Template["About"].Version() then
+        if not PfExtend_Database["QuestHelper"]["updated"] or PfExtend_Database["QuestHelper"]["version"] ~= PfExtend_Config_Template["About"].Version() then
             PFEXQuestHelper.UpdateDatabase();
             PfExtend_Database["QuestHelper"]["version"] = PfExtend_Config_Template["About"].Version()
         end

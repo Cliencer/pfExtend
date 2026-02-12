@@ -1,5 +1,5 @@
 PfExtend_Config["QuestHelper"] = {}
-PfExtend_Config_Index["QuestHelper"] = { "enable", "updateData" }
+PfExtend_Config_Index["QuestHelper"] = { "enable", "updateData","hideRace","hideClass","hideSkill","hideEvent" }
 PfExtend_Config_Template["QuestHelper"] = {
     ["enable"] = true,
     ["updateData"] = function()
@@ -13,5 +13,10 @@ PfExtend_Config_Template["QuestHelper"] = {
                 end
             end
         }
-    end
+    end,
+    ["hideRace"] = true,
+    ["hideClass"] = true,
+    ["hideSkill"] = true,
+    ["hideEvent"] = false,
+    
 }

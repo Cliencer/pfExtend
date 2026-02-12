@@ -206,7 +206,7 @@ end
 function PFEXShowLoots.OnEvent(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
     if not PfExtend_Global.ReadSetting("ShowLoots", "enable") then return end
     if (event == "PLAYER_ENTERING_WORLD") then
-        if PfExtend_Database["ShowLoots"]["updated"] ~= true or PfExtend_Database["ShowLoots"]["version"] ~= PfExtend_Config_Template["About"].Version() then
+        if not PfExtend_Database["ShowLoots"]["updated"] or PfExtend_Database["ShowLoots"]["version"] ~= PfExtend_Config_Template["About"].Version() then
             PFEXShowLoots.UpdateDatabase();
             PfExtend_Database["ShowLoots"]["version"] = PfExtend_Config_Template["About"].Version()
         end

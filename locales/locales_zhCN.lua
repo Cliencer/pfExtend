@@ -17,9 +17,9 @@ pfExtend_Locales["zhCN"] = {
     ["%d %s or better loots(of %d)"] = "%d件%s及以上的掉落物(共%d件)",
     ["Setting"] = "设置",
     ["Open Config Window"] = "打开设置窗口",
-    ["Hold <Ctrl> and Click to track Pre-quest on the other map"]= "按住<Ctrl>并点击将在另一张地图上追踪前置任务",
-    ["Click to fix on the map"]="点击将任务位置固定在地图上",
-    ["Click to track the quest on the other map"] ="点击将在另一张地图上查看该任务",
+    ["Hold <Ctrl> and Click to track Pre-quest on the other map"] = "按住<Ctrl>并点击将在另一张地图上追踪前置任务",
+    ["Click to fix on the map"] = "点击将任务位置固定在地图上",
+    ["Click to track the quest on the other map"] = "点击将在另一张地图上查看该任务",
 
     ["QuestHelper_FLAG_Finished"] = "(已完成)",
     ["QuestHelper_FLAG_Active"] = "(进行中)",
@@ -37,7 +37,7 @@ pfExtend_Locales["zhCN"] = {
     ["Config_About_Author"] = "作者",
     ["Config_About_Version"] = "版本",
     ["Config_About_Github"] = "Github",
-    
+
     ["Config_ShowLoots"] = "掉落显示",
     ["Config_ShowLoots_enable"] = "启用",
     ["Config_ShowLoots_showNum"] = "提示框中掉落列举的行数",
@@ -54,9 +54,15 @@ pfExtend_Locales["zhCN"] = {
     ["Config_QuestHelper"] = "任务助手",
     ["Config_QuestHelper_enable"] = "启用",
     ["Config_QuestHelper_updateData"] = "数据库",
+    ["Config_QuestHelper_hideRace"] = "隐藏非当前种族任务",
+    ["Config_QuestHelper_hideClass"] = "隐藏非当前职业任务",
+    ["Config_QuestHelper_hideSkill"] = "隐藏非当前专业任务",
+    ["Config_QuestHelper_hideEvent"] = "隐藏活动任务",
+
+
     ["Btn_updateData"] = "更新",
-    ["Btn_updateSuccess"] ="更新成功",
-    ["Btn_updateFailed"] ="更新失败",
+    ["Btn_updateSuccess"] = "更新成功",
+    ["Btn_updateFailed"] = "更新失败",
     ["Update_Error_Hint"] = "错误：未找到pfQuest数据库，请检查是否安装pfQuest和PfUI！",
     ["Update_Success_Hint"] = "成功从pfQuest更新数据库！"
 }

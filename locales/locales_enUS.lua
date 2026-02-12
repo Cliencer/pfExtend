@@ -33,6 +33,7 @@ pfExtend_Locales["enUS"] = {
     ["QuestHelper_FLAG_Hidden"] = "(Hidden)",
     ["QuestHelper_FLAG_Available"] = "(Available)",
 
+
     ["windowTitle_Config"] = "|cff33ffccC|ronfig",
     ["Config_About"] = "About",
     ["Config_About_Author"] = "Author",
@@ -55,6 +56,11 @@ pfExtend_Locales["enUS"] = {
     ["Config_QuestHelper"] = "QuestHelper",
     ["Config_QuestHelper_enable"] = "Enabled",
     ["Config_QuestHelper_updateData"] = "DataBase",
+    ["Config_QuestHelper_hideRace"] = "Hide non-current-RACE tasks",
+    ["Config_QuestHelper_hideClass"] = "Hide non-current-CLASS tasks",
+    ["Config_QuestHelper_hideSkill"] = "Hide non-current-SKILL tasks",
+    ["Config_QuestHelper_hideEvent"] = "Hide EVENT tasks",
+
     ["Btn_updateData"] = "Update",
     ["Btn_updateSuccess"] = "Success",
     ["Btn_updateFailed"] = "Failed",

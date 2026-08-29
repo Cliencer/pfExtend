@@ -687,7 +687,10 @@ function PFEXQuestHelper.AddMapNode(id, ispfDB)
     local quests = pfDB["quests"]["data"]
     meta["questid"] = id
     meta["quest"] = pfDB.quests.loc[id] and pfDB.quests.loc[id].T
-    meta["quest"] = meta["quest"] .. " (" .. id .. ")"
+    if meta["quest"] then
+        meta["quest"] = meta["quest"] .. " (" .. id .. ")"
+    end
+    if not quests[id] then return meta["quest"] end
     meta["qlvl"] = quests[id]["lvl"]
     meta["qmin"] = quests[id]["min"]
     if meta.quest then
@@ -745,8 +748,11 @@ function PFEXQuestHelper.AddMapNode(id, ispfDB)
         if quests[id]["end"] then
             -- units
             if quests[id]["end"]["U"] then
+                -- a quest can have a recorded ender but no recorded starter,
+                -- so quests[id]["start"] may be nil here
+                local startUnits = quests[id]["start"] and quests[id]["start"]["U"]
                 for _, unit in pairs(quests[id]["end"]["U"]) do
-                    if table.contain(quests[id]["start"]["U"], unit) then
+                    if startUnits and table.contain(startUnits, unit) then
                         meta["texture"] = pfQuestConfig.path .. "\\img\\startendstart"
                     else
                         meta["texture"] = pfQuestConfig.path .. "\\img\\complete"
@@ -763,8 +769,10 @@ function PFEXQuestHelper.AddMapNode(id, ispfDB)
 
             -- objects
             if quests[id]["end"]["O"] then
+                -- same here: the ender can exist without a recorded starter
+                local startObjects = quests[id]["start"] and quests[id]["start"]["O"]
                 for _, object in pairs(quests[id]["end"]["O"]) do
-                    if table.contain(quests[id]["start"]["O"], object) then
+                    if startObjects and table.contain(startObjects, object) then
                         meta["texture"] = pfQuestConfig.path .. "\\img\\startendstart"
                     else
                         meta["texture"] = pfQuestConfig.path .. "\\img\\complete"

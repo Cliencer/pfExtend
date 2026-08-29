@@ -136,3 +136,4 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供
 - **作者**：Cliencer
 - **基础框架**：pfQuest by Shagu
 - **UI 框架**：pfUI by Shagu
+- **其他贡献者**: roby-brok

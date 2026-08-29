@@ -109,6 +109,8 @@ PFEXQuestHelper.QuestFilter = function(id)
         STARTITEM = false,     --从物品接取
     }
 
+    if not quests[id] then ret.UNKNOWN = true return ret end
+
     if quests[id]["lvl"] then ret.lvl = quests[id]["lvl"] end
     if quests[id]["min"] then ret.min = quests[id]["min"] end
     if pfQuest.questlog[id] then ret.DOING = true end
@@ -126,7 +128,7 @@ PFEXQuestHelper.QuestFilter = function(id)
     end
     if quests[id]["race"] and not (bit.band(quests[id]["race"], PFEXQuestHelper.prace) == PFEXQuestHelper.prace) then ret.WRONGRACE = true end
     if quests[id]["class"] and not (bit.band(quests[id]["class"], PFEXQuestHelper.pclass) == PFEXQuestHelper.pclass) then ret.WRONGCLASS = true end
-    if quests[id]["skill"] and not pfDatabase:GetPlayerSkill(quests[id]["skill"]) then ret.WRONGCLASS = true end
+    if quests[id]["skill"] and not pfDatabase:GetPlayerSkill(quests[id]["skill"]) then ret.WRONGSKILL = true end
     if quests[id]["min"] and quests[id]["min"] > PFEXQuestHelper.plevel then ret.LOWLEVEL = true end
     if quests[id]["event"] then ret.EVENT = true end
     if quests[id]["start"] then
@@ -140,7 +142,7 @@ PFEXQuestHelper.QuestFilter = function(id)
         end
         if quests[id]["start"]["O"] then
             for _, object in pairs(quests[id]["start"]["O"]) do
-                if objects[object] and objects[object]["fac"] and strfind(objects[object]["fac"], PFEXQuestHelper.pfaction) then
+                if objects[object] and objects[object]["fac"] and not strfind(objects[object]["fac"], PFEXQuestHelper.pfaction) then
                     ret.WRONGFACTION = true;
                 end
             end
@@ -417,8 +419,8 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
 
     -- 优先级位定义（从前到后，前面的优先级高，对应低位）
     local PRIORITY = {
-        HAS_PRE     = 2,   -- 00000001  有前置（倒数第八）
-        FINISHED    = 0,   -- 00000010  已完成（倒数第七）
+        HAS_PRE     = 1,   -- 00000001  有前置（倒数第八）
+        FINISHED    = 2,   -- 00000010  已完成（倒数第七）
         AFTER_FIN   = 4,   -- 00000100  后续全完成（倒数第六）
         EVENT       = 8,   -- 00001000  事件任务（倒数第五）
         WRONG_SKILL = 16,  -- 00010000  专业不对（倒数第四）
@@ -524,7 +526,7 @@ PFEXQuestHelper.OnMapChange = function()
 
     for _, location in pairs(locations) do
         if z2q[location] then
-            for k, _ in pairs(z2q[PFEXQuestHelper.zone]) do
+            for k, _ in pairs(z2q[location]) do
                 table.insert(questList, k)
             end
         end
@@ -566,9 +568,11 @@ PFEXQuestHelper.OnEvent = function(event, arg1, arg2, arg3, arg4, arg5, arg6, ar
     if (event == "PLAYER_ENTERING_WORLD") then
         PFEXQuestHelper.Reload()
         PFEXQuestHelper.GetPlayerData()
-        if not PfExtend_Database["QuestHelper"]["updated"] or PfExtend_Database["QuestHelper"]["version"] ~= PfExtend_Config_Template["About"].Version() then
+        local version = PfExtend_Config_Template["About"].Version().text
+        version = version .. "|" .. tostring(GetAddOnMetadata("pfQuest-octo", "Version") or "nopack")
+        if not PfExtend_Database["QuestHelper"]["updated"] or PfExtend_Database["QuestHelper"]["version"] ~= version then
             PFEXQuestHelper.UpdateDatabase();
-            PfExtend_Database["QuestHelper"]["version"] = PfExtend_Config_Template["About"].Version()
+            PfExtend_Database["QuestHelper"]["version"] = version
         end
     elseif (event == "WORLD_MAP_UPDATE" and last_zone ~= zone) then
         last_zone = zone;

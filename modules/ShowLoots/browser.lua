@@ -1,7 +1,17 @@
 local compat = pfExtendCompat;
 local tooltip_limit = 5;
-local currentSortBy = "chance"; -- 当前排序方式: chance, id, name
+local currentSortBy = "chance"; -- 当前排序方式: chance, id, quality
 local currentSortOrder = "desc"; -- 当前排序顺序: asc(升序), desc(降序)
+
+-- The rows the window is currently showing. Captured when the window opens so
+-- the display survives the cursor leaving the mob: PFEXShowLoots.LootListShown
+-- is rebuilt from the live mouseover and is emptied the moment you look away.
+-- Assignment there replaces the table rather than clearing it, so holding this
+-- reference is enough to keep the snapshot intact.
+local shownLootList = {}
+
+-- Forward declaration: the sort buttons are created before this is defined.
+local PopulateLootList
 
 
 -- add database shortcuts
@@ -546,8 +556,9 @@ local function CreateSortButton(name, textKey, sortBy, xOffset)
         end
         
         -- 重新显示当前掉落列表
-        PFEXShowLoots.Browser:Hide()
-        PFEXShowLoots.Browser:Show()
+        -- Repopulate in place. This used to Hide() then Show() to re-trigger
+        -- OnShow, which also re-read the live mouseover list -- by then empty.
+        PopulateLootList()
     end)
     
     return btn
@@ -563,7 +574,9 @@ local function SortLootList(lootList)
     -- 首先分离star物品和非star物品
     local starred = {}
     local normal = {}
-    
+
+    if not lootList then return {} end
+
     for _, l in ipairs(lootList) do
         local id = l[1]
         if pfBrowser_fav and pfBrowser_fav["items"] and pfBrowser_fav["items"][id] then
@@ -639,11 +652,10 @@ local function SortLootList(lootList)
     return result
 end
 
-PFEXShowLoots.Browser:SetScript("OnShow", function()
-    PFEXShowLoots.isBrowse = true;
-    openTime = GetTime();
-    PFEXShowLoots.Browser.MobName:SetText(PFEXShowLoots.focus_name)
-    
+-- Sort and draw the snapshot. Called on open and again after every sort click;
+-- deliberately does not touch PFEXShowLoots.LootListShown, which by then
+-- reflects wherever the cursor happens to be rather than the mob on display.
+PopulateLootList = function()
     -- 更新排序按钮高亮状态和文本
     for _, button in ipairs({"sortByChance", "sortById", "sortByQuality"}) do
         local b = PFEXShowLoots.Browser[button]
@@ -652,10 +664,10 @@ PFEXShowLoots.Browser:SetScript("OnShow", function()
             UpdateSortButtonText(b)
         end
     end
-    
+
     -- 排序掉落列表
-    local sortedLootList = SortLootList(PFEXShowLoots.LootListShown)
-    
+    local sortedLootList = SortLootList(shownLootList)
+
     local i = 0
     for _, l in ipairs(sortedLootList) do
         local id, chance, r, g, b = unpack(l)
@@ -670,6 +682,16 @@ PFEXShowLoots.Browser:SetScript("OnShow", function()
         PFEXShowLoots.Browser.scroll.buttons[i]:Reload()
     end
     RefreshView(i)
+end
+
+PFEXShowLoots.Browser:SetScript("OnShow", function()
+    PFEXShowLoots.isBrowse = true;
+    openTime = GetTime();
+    PFEXShowLoots.Browser.MobName:SetText(PFEXShowLoots.focus_name)
+
+    -- Take the snapshot here, while the mouseover that produced the list is
+    -- still the one under the cursor.
+    shownLootList = PFEXShowLoots.LootListShown or {}
+
+    PopulateLootList()
 end)
-
-

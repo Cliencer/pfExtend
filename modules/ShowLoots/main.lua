@@ -206,15 +206,44 @@ end
 function PFEXShowLoots.OnEvent(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
     if not PfExtend_Global.ReadSetting("ShowLoots", "enable") then return end
     if (event == "PLAYER_ENTERING_WORLD") then
-        if not PfExtend_Database["ShowLoots"]["updated"] or PfExtend_Database["ShowLoots"]["version"] ~= PfExtend_Config_Template["About"].Version() then
+        -- .text, not the table. Version() builds a fresh {text=...} every call,
+        -- so comparing the table itself was never equal to the stored one and
+        -- UpdateDatabase() -- a walk over every item in the pfQuest database
+        -- with refloot expansion, written straight into SavedVariables -- ran on
+        -- every single login instead of only when the version changed.
+        local version = PfExtend_Config_Template["About"].Version().text
+        -- Key the cache to the database pack too: the loot DB is BUILT from
+        -- pack data, so a pack update must invalidate it. Before this, a data
+        -- correction in pfQuest-octo left every existing install showing the
+        -- old loot until pfExtend itself changed version.
+        version = version .. "|" .. tostring(GetAddOnMetadata("pfQuest-octo", "Version") or "nopack")
+        if not PfExtend_Database["ShowLoots"]["updated"] or PfExtend_Database["ShowLoots"]["version"] ~= version then
             PFEXShowLoots.UpdateDatabase();
-            PfExtend_Database["ShowLoots"]["version"] = PfExtend_Config_Template["About"].Version()
+            PfExtend_Database["ShowLoots"]["version"] = version
         end
     elseif (event == "UPDATE_MOUSEOVER_UNIT") then
+        -- Leaving a unit fires this too, with no mouseover unit. Rebuilding on
+        -- that emptied LootListShown -- and moving the cursor off the mob is
+        -- exactly what you do to reach the browser window, so by the time you
+        -- clicked a sort button the list it re-reads was already gone and every
+        -- row vanished. Leave the list alone while the window is open.
+        if PFEXShowLoots.isBrowse then return end
+
+        -- The loss-fire used to fall through to the rebuild below: it flagged
+        -- isShown false with an empty list while the old unit's tooltip was
+        -- still on screen fading out, so the ticker stamped "No loots" right
+        -- under the loot lines it had just written. Both stacks now fire this
+        -- event on losing the unit as well (ClassicAPI always did; SuperAPI
+        -- gained it recently). Nothing under the cursor, nothing to describe --
+        -- and keeping the last list is what the browser flow above wants.
+        if not UnitExists("mouseover") then return end
+
         PFEXShowLoots.LootListShown = {}
         isShown = false;
-        if (UnitExists("mouseover") and not UnitPlayerControlled("mouseover")) then
-            PFEXShowLoots.LootListShown = PFEXShowLoots.ModifyTooltip();
+        if (not UnitPlayerControlled("mouseover")) then
+            -- ModifyTooltip returns nil for a focus it refuses to describe, and
+            -- nil here makes the next ipairs() over the list an error.
+            PFEXShowLoots.LootListShown = PFEXShowLoots.ModifyTooltip() or {};
         end
     end
 end

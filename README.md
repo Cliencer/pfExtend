@@ -133,4 +133,4 @@ Both features require a one-time database initialization:
 - **Author**: Cliencer
 - **Base Framework**: pfQuest by Shagu
 - **UI Framework**: pfUI by Shagu
-
+- **Other Contributors**: roby-brok

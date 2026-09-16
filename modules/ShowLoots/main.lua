@@ -24,7 +24,7 @@ PFEXShowLoots.UpdateDatabase = function()
         DEFAULT_CHAT_FRAME:AddMessage("|cFFFF8080"..pfExtend_Loc["Update_Error_Hint"]);
         return false;
     end
-    local db = {}
+    local db = { U = {}, O = {} }
     for itemId, itemData in pairs(pfDB["items"]["data"]) do
         for lootType, LootData in pairs(itemData) do
             for from, probability in pairs(LootData) do
@@ -81,7 +81,7 @@ PFEXShowLoots.ModifyTooltip = function()
     for id in pairs(pfDatabase:GetIDByName(PFEXShowLoots.focus_name, "units")) do
         for _, data in pairs(pfDB["units"]["data"][id]["coords"]) do
             local x, y, zone, respawn = unpack(data)
-            if zone == focus_zone and type(db["U"][id]) == "table" then
+            if zone == focus_zone and db["U"] and type(db["U"][id]) == "table" then
                 local lootList = db["U"][id]
                 local sortLootList = table.shallowCopy(lootList)
                 for itemid, chance in pairs(sortLootList) do

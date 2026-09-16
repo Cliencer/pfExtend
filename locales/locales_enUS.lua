@@ -60,6 +60,10 @@ pfExtend_Locales["enUS"] = {
     ["Config_QuestHelper_hideClass"] = "Hide non-current-CLASS tasks",
     ["Config_QuestHelper_hideSkill"] = "Hide non-current-SKILL tasks",
     ["Config_QuestHelper_hideEvent"] = "Hide EVENT tasks",
+    ["Config_QuestHelper_questlogChain"] = "Show quest chain button in quest log",
+    ["QuestHelper_ChainTitle"] = "Quest Chain",
+    ["QuestHelper_ChainTip"] = "Show the follow-up quest chain",
+    ["QuestHelper_ChainEmpty"] = "No follow-up quests to display",
 
     ["Btn_updateData"] = "Update",
     ["Btn_updateSuccess"] = "Success",

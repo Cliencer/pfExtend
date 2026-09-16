@@ -7,6 +7,8 @@ function pfExtend_OnLoad()
     this:RegisterEvent("PLAYER_ENTERING_WORLD");
     this:RegisterEvent("UPDATE_MOUSEOVER_UNIT");
     this:RegisterEvent("WORLD_MAP_UPDATE");
+    this:RegisterEvent("SKILL_LINES_CHANGED");
+    this:RegisterEvent("CHAT_MSG_SKILL");
     SLASH_pfExtendCmd1 = "/pfex";
     SlashCmdList["pfExtendCmd"] = function(msg)
         pfExtend_ChatCommandHandler(msg);

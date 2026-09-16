@@ -58,6 +58,10 @@ pfExtend_Locales["zhCN"] = {
     ["Config_QuestHelper_hideClass"] = "隐藏非当前职业任务",
     ["Config_QuestHelper_hideSkill"] = "隐藏非当前专业任务",
     ["Config_QuestHelper_hideEvent"] = "隐藏活动任务",
+    ["Config_QuestHelper_questlogChain"] = "任务日志显示任务链按钮",
+    ["QuestHelper_ChainTitle"] = "任务链",
+    ["QuestHelper_ChainTip"] = "查看该任务的后续任务链",
+    ["QuestHelper_ChainEmpty"] = "没有可显示的后续任务",
 
 
     ["Btn_updateData"] = "更新",

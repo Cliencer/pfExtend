@@ -28,8 +28,8 @@ PFEXQuestHelper.Browser:SetScript("OnHide", function()
     PFEXQuestHelper.MapToggleButton:Show()
 end)
 PFEXQuestHelper.Browser:SetScript("OnShow", function()
+    -- OnMapChange内部已带缓存判断，数据未变化时不会重建，此处无需再调BuildTree
     PFEXQuestHelper.OnMapChange()
-    PFEXQuestHelper.Browser:BuildTree(PFEXQuestHelper.TreeData)
 end)
 pfUI.api.CreateBackdrop(PFEXQuestHelper.Browser, nil, true, 0.75)
 
@@ -270,53 +270,11 @@ function PFEXQuestHelper.Browser:CreateNode(data, parentNode, level, pooledFrame
 
     -- 设置文本
     local flag = data.flag
-    
-    local color, tag, text = nil, "", nil
 
-    if flag.UNKNOWN then
-        text = "|cff9d9d9dUnknown|r"
-    elseif flag.FINISHED and not flag.AFTERFINISHED then
-        color = "|cffffff2b"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Finished"]
-    elseif flag.FINISHED and flag.AFTERFINISHED then
-        color = "|cff5a5a5a"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Finished"]
-    elseif flag.DOING then
+    if flag.DOING and not flag.FINISHED and not flag.UNKNOWN then
         PFEXQuestHelper.expandToId[data.id] = true
-        color = "|cff3eff2b"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Active"]
-    elseif flag.WRONGRACE then
-        color = "|cff5a5a5a"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Race"]
-    elseif flag.WRONGCLASS then
-        color = "|cff5a5a5a"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Class"]
-    elseif flag.WRONGSKILL then
-        color = "|cff5a5a5a"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Skill"]
-    elseif flag.EVENT then
-        color = "|cff2b3eff"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Event"]
-    elseif flag.UNDOPRE then
-        color = "|cffff2b2b"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Prereq"]
-    elseif flag.LOWLEVEL then
-        color = "|cffff2b2b"
-        tag = pfExtend_Loc["QuestHelper_FLAG_High-Level"]
-    elseif flag.STARTITEM then
-        color = "|cffffff2b"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Hidden"]
-    else
-        color = "|cffffff2b"
-        tag = pfExtend_Loc["QuestHelper_FLAG_Available"]
     end
-
-    if text == nil and pfDB["quests"]["loc"] then
-        text = color .. tag .. "  " .. pfDB["quests"]["loc"][data.id]["T"]
-    else
-        text = "|cff9d9d9dUnknown|r"
-    end
-
+    local text = PFEXQuestHelper.FormatQuestText(flag, data.id)
 
     button.text:SetText(text)
 

@@ -12,7 +12,9 @@ PFEXQuestHelper = {
     prace = nil,
     pfaction = nil,
     expandToId = nil,
-    zone = nil
+    zone = nil,
+    cacheKey = nil,      -- 上次构建TreeData时的缓存键
+    skillsVersion = 0    -- 专业技能变动计数（用于缓存失效）
 }
 
 
@@ -155,6 +157,53 @@ PFEXQuestHelper.QuestFilter = function(id)
     return ret
 end
 
+-- 根据任务状态flag生成带颜色标签的显示文本（Browser与任务链窗口共用）
+PFEXQuestHelper.FormatQuestText = function(flag, id)
+    local color, tag
+
+    if flag.UNKNOWN then
+        return "|cff9d9d9dUnknown|r"
+    elseif flag.FINISHED and not flag.AFTERFINISHED then
+        color = "|cffffff2b"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Finished"]
+    elseif flag.FINISHED and flag.AFTERFINISHED then
+        color = "|cff5a5a5a"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Finished"]
+    elseif flag.DOING then
+        color = "|cff3eff2b"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Active"]
+    elseif flag.WRONGRACE then
+        color = "|cff5a5a5a"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Race"]
+    elseif flag.WRONGCLASS then
+        color = "|cff5a5a5a"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Class"]
+    elseif flag.WRONGSKILL then
+        color = "|cff5a5a5a"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Skill"]
+    elseif flag.EVENT then
+        color = "|cff2b3eff"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Event"]
+    elseif flag.UNDOPRE then
+        color = "|cffff2b2b"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Prereq"]
+    elseif flag.LOWLEVEL then
+        color = "|cffff2b2b"
+        tag = pfExtend_Loc["QuestHelper_FLAG_High-Level"]
+    elseif flag.STARTITEM then
+        color = "|cffffff2b"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Hidden"]
+    else
+        color = "|cffffff2b"
+        tag = pfExtend_Loc["QuestHelper_FLAG_Available"]
+    end
+
+    if pfDB["quests"]["loc"] and pfDB["quests"]["loc"][id] then
+        return color .. tag .. "  " .. pfDB["quests"]["loc"][id]["T"]
+    end
+    return "|cff9d9d9dUnknown|r"
+end
+
 PFEXQuestHelper.ReadCoords = function(id, type)
     local ret = {};
     local data = {
@@ -248,6 +297,7 @@ PFEXQuestHelper.UpdateDatabase = function()
     end
     PfExtend_Database["QuestHelper"]["LootData"] = db;
     PfExtend_Database["QuestHelper"]["updated"] = true;
+    PFEXQuestHelper.cacheKey = nil; -- 数据库重建后使缓存失效
     DEFAULT_CHAT_FRAME:AddMessage("|cFFFF8080" .. pfExtend_Loc["Update_Success_Hint"])
     return true;
 end
@@ -511,10 +561,56 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
     return result
 end
 
+-- 任务日志指纹（接取/放弃任务会改变）
+local function GetQuestLogFingerprint()
+    local count, sum = 0, 0
+    for id in pairs(pfQuest.questlog) do
+        count = count + 1
+        sum = sum + id
+    end
+    return count .. ":" .. sum
+end
+
+-- 已完成任务数量（完成任务只会增长）
+local function GetHistoryCount()
+    local count = 0
+    for _ in pairs(pfQuest_history) do count = count + 1 end
+    return count
+end
+
+-- 构建缓存键：任何影响列表结果的因素变动都会导致键变化
+PFEXQuestHelper.BuildCacheKey = function(zone)
+    return table.concat({
+        zone or 0,
+        PFEXQuestHelper.plevel or 0,
+        PFEXQuestHelper.pfaction or "",
+        PFEXQuestHelper.prace or 0,
+        PFEXQuestHelper.pclass or 0,
+        PFEXQuestHelper.skillsVersion,
+        PfExtend_Database["QuestHelper"]["version"] or "",
+        tostring(PfExtend_Global.ReadSetting("QuestHelper", "hideClass")),
+        tostring(PfExtend_Global.ReadSetting("QuestHelper", "hideRace")),
+        tostring(PfExtend_Global.ReadSetting("QuestHelper", "hideSkill")),
+        tostring(PfExtend_Global.ReadSetting("QuestHelper", "hideEvent")),
+        GetQuestLogFingerprint(),
+        GetHistoryCount(),
+    }, "|")
+end
+
 PFEXQuestHelper.OnMapChange = function()
+    -- 面板未显示时不做任何构建（打开面板时OnShow会触发本函数）
+    if not PFEXQuestHelper.Browser or not PFEXQuestHelper.Browser:IsShown() then return end
     PFEXQuestHelper.GetPlayerData()
-    local questList = {}
     PFEXQuestHelper.zone = pfMap:GetMapID(GetCurrentMapContinent(), GetCurrentMapZone())
+
+    -- 缓存键未变化则直接复用上次的树，避免重复构建
+    local key = PFEXQuestHelper.BuildCacheKey(PFEXQuestHelper.zone)
+    if PFEXQuestHelper.cacheKey == key and PFEXQuestHelper.TreeData then
+        return
+    end
+    PFEXQuestHelper.cacheKey = key
+
+    local questList = {}
     local q2z = PfExtend_Database["QuestHelper"]["QuestZoneData"]
     local z2q = PfExtend_Database["QuestHelper"]["ZoneQuestData"]
     if z2q[PFEXQuestHelper.zone] then
@@ -533,9 +629,7 @@ PFEXQuestHelper.OnMapChange = function()
     end
     questList = table.unique(questList)
     PFEXQuestHelper.TreeData = PFEXQuestHelper.QuestChainBuilder(questList);
-    if PFEXQuestHelper.Browser:IsShown() then
-        PFEXQuestHelper.Browser:BuildTree(PFEXQuestHelper.TreeData)
-    end
+    PFEXQuestHelper.Browser:BuildTree(PFEXQuestHelper.TreeData)
 end
 
 
@@ -549,6 +643,12 @@ end
 local zone, last_zone
 
 PFEXQuestHelper.OnEvent = function(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    if (event == "SKILL_LINES_CHANGED" or event == "CHAT_MSG_SKILL") then
+        -- 专业技能变动会使缓存失效（下次打开地图时重建）
+        -- 注意：即使模块当前被禁用也要计数，避免重新启用后用到过期缓存
+        PFEXQuestHelper.skillsVersion = PFEXQuestHelper.skillsVersion + 1
+        return
+    end
     if not PfExtend_Global.ReadSetting("QuestHelper", "enable") then
         if PFEXQuestHelper.MapToggleButton then
             PFEXQuestHelper.MapToggleButton:Hide()

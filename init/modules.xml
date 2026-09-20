@@ -9,8 +9,11 @@
   <Include file="..\modules\ShowLoots\browser.lua"/>
 
   <Include file="..\modules\QuestHelper\config.lua"/>
+  <Include file="..\modules\QuestHelper\rewards_data.lua"/>
   <Include file="..\modules\QuestHelper\main.lua"/>
   <Include file="..\modules\QuestHelper\browser.lua"/>
   <Include file="..\modules\QuestHelper\chainviewer.lua"/>
+  <Include file="..\modules\QuestHelper\detailviewer.lua"/>
+  <Include file="..\modules\QuestHelper\rewards.lua"/>
 
 </Ui>

@@ -2,7 +2,7 @@
 
 English | [简体中文](README-zhCN.md)
 
-pfExtend is an extension addon for [pfQuest](https://github.com/shagu/pfQuest), enhancing the gameplay experience by providing monster loot display and quest chain visualization functionalities. Compatible with **Turtle WoW** (1.12.0 client).
+pfExtend is an extension addon for [pfQuest](https://github.com/shagu/pfQuest), providing monster loot display, quest chain visualization and quest reward lookup. Compatible with **Turtle WoW** (1.12.0 client).
 
 ## Features
 
@@ -38,7 +38,7 @@ When hovering over a monster, automatically displays its full loot table in the 
 
 ### QuestHelper - Quest Chain Browser
 
-A powerful quest chain visualization tool integrated into the World Map.
+A powerful quest chain visualization tool integrated into the World Map, with quest reward lookup and quest detail viewing.
 ![QuestHelper Browser](img/Snipaste_2026-02-10_17-50-45.jpg)
 
 **Key Features:**
@@ -77,8 +77,29 @@ A powerful quest chain visualization tool integrated into the World Map.
 **Quest Chain Navigation:**
 - **Expandable Tree**: Click `+`/`-` to expand or collapse quest chains
 - **Double-Click**: Expand/collapse entire subtree at once
+- **Auto-Expand**: Automatically expands the tree to quests currently in your quest log
 - **Auto-Scroll**: Automatically scrolls to relevant quest when switching zones
 - **Persistent Pins**: Quest pins remain on map until manually removed
+
+**Quest Log Chain Viewer:**
+- Quests in the quest log that have follow-ups show a chain button; click it to open a window listing all follow-up quests
+- In the chain window: click to locate the quest on the World Map, Shift+Click to insert a quest link into chat
+
+**Quest Rewards in Tooltips:**
+- Quest tooltips automatically show reward information:
+  - Experience
+  - Max-level money (the data source only provides max-level converted money)
+  - Fixed reward items / choice reward items (with quality colors and counts)
+- Toggleable in settings (QuestHelper → Show rewards in quest tooltips)
+- Reward data covers 6000+ quests (including all Turtle WoW custom quests), sourced from [OctoWow Database](https://octowow.st/db/)
+
+**Quest Detail Window:**
+- **Right-click** a quest name in the chain list or chain window to open a detail window showing:
+  - Quest title (with level, colored by difficulty)
+  - Objective text and live progress (for quests in your quest log)
+  - Full description text
+  - Rewards: XP, max-level money, item icon rows (hover icons for item tooltips, Shift+Click to insert item links)
+- The window is draggable and closes with Esc
 
 **Advanced Features:**
 - **Prerequisite Finder**: Automatically locates prerequisite quests when current quest is unavailable
@@ -91,7 +112,7 @@ A powerful quest chain visualization tool integrated into the World Map.
 ## Dependencies
 
 - **[pfQuest](https://github.com/shagu/pfQuest)** - Required database provider
-- **[pfQuest-turtle](https://github.com/shagu/pfQuest-turtle)** - Additional database for Turtle WoW (required only for Turtle WoW)
+- **[pfQuest-turtle](https://github.com/shagu/pfQuest-turtle)** / **[pfQuest-octo](https://github.com/paokkerkir/pfQuest-octo)** - Additional database for Turtle WoW (required only for Turtle WoW)
 - **[pfUI](https://github.com/shagu/pfUI)** - Recommended UI framework (optional)
 
 ## Installation
@@ -117,15 +138,24 @@ Access settings via:
 
 ## Database Update
 
-Both features require a one-time database initialization:
+The loot display and quest chain features require a one-time database initialization:
 - Automatically updates on first login after installation
 - Manual update available via settings
 - Update required when pfQuest database changes
 
+Quest reward data ships as a built-in data file (no initialization needed), covering both vanilla and Turtle WoW custom quests.
+
+## For Developers
+
+The `questGaindb/` directory is the scraping workspace for quest reward data (not needed by players):
+- Includes a Python scraper that fetches quest rewards (items/XP) in bulk from [OctoWow Database](https://octowow.st/db/)
+- To regenerate the data: run `python scrape.py all` inside that directory; the generated data file is automatically synced into the addon
+- See `questGaindb/README.md` for details
+
 ## Compatibility
 
 - **Client**: World of Warcraft 1.12.0 (Vanilla), compatible with **Turtle WoW**
-- **Dependencies**: pfQuest (and pfQuest-turtle for Turtle WoW), pfUI(optional)
+- **Dependencies**: pfQuest (and pfQuest-turtle or pfQuest-octo for Turtle WoW), pfUI (optional)
 - **Conflicts**: None known
 
 ## Credits

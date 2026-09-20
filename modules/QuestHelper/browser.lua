@@ -138,6 +138,7 @@ function PFEXQuestHelper.Browser:CreatePooledButton(index)
     -- 主按钮
     local button = CreateFrame("Button", nil, self.content)
     button:SetHeight(self.lineHeight)
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     pfUI.api.SkinButton(button)
 
     button.tex = button:CreateTexture("BACKGROUND")
@@ -271,8 +272,9 @@ function PFEXQuestHelper.Browser:CreateNode(data, parentNode, level, pooledFrame
     -- 设置文本
     local flag = data.flag
 
+    -- 自动展开到进行中的任务（"auto"标记：只展开，不高亮）
     if flag.DOING and not flag.FINISHED and not flag.UNKNOWN then
-        PFEXQuestHelper.expandToId[data.id] = true
+        PFEXQuestHelper.expandToId[data.id] = "auto"
     end
     local text = PFEXQuestHelper.FormatQuestText(flag, data.id)
 
@@ -307,6 +309,10 @@ function PFEXQuestHelper.Browser:CreateNode(data, parentNode, level, pooledFrame
     end)
 
     button:SetScript("OnClick", function()
+        if arg1 == "RightButton" then
+            PFEXQuestHelper.ShowQuestDetail(data.id)
+            return
+        end
         if IsControlKeyDown() and node.clickType == "FINDPRE" then
             local preId, preZone = PFEXQuestHelper.FindPreUndo(node.data.id)
             PFEXQuestHelper.expandToId[data.id] = true 
@@ -389,13 +395,17 @@ function PFEXQuestHelper.Browser:CreateNode(data, parentNode, level, pooledFrame
     end
 
     -- 展开到指定 ID
-    if PFEXQuestHelper.expandToId[data.id] then
+    local expandMode = PFEXQuestHelper.expandToId[data.id]
+    if expandMode then
         local pnode = node
         for i = level, 0, -1 do
             pnode.expanded = true
             pnode = pnode.parent or pnode
         end
-        button.texClickable:Show()
+        -- 自动展开的（进行中任务）不高亮；玩家主动点击定位的保持高亮
+        if expandMode ~= "auto" then
+            button.texClickable:Show()
+        end
         PFEXQuestHelper.expandToId[data.id] = false
         if not PFEXQuestHelper.expandToRootId then PFEXQuestHelper.expandToRootId = pnode.data.id end
     end

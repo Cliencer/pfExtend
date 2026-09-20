@@ -1,8 +1,6 @@
 -- 任务日志"任务链"功能：在每个已接取且有后续的任务行上显示链条按钮，
 -- 点击后弹出该任务的后续环节查看窗口
 
-DEFAULT_CHAT_FRAME:AddMessage("|cff33ffccpfExtend: chainviewer.lua 已加载") -- 调试标记，确认后删除
-
 local LINE_HEIGHT = 18
 local INDENT = 16
 
@@ -75,6 +73,7 @@ local function GetChainRow(index)
 
     local row = CreateFrame("Button", nil, frame.content)
     row:SetHeight(LINE_HEIGHT)
+    row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     row:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 0, -(index - 1) * LINE_HEIGHT)
     row:SetPoint("TOPRIGHT", frame.content, "TOPRIGHT", 0, -(index - 1) * LINE_HEIGHT)
 
@@ -88,10 +87,14 @@ local function GetChainRow(index)
     row.text:SetPoint("LEFT", 0, 0)
     row.text:SetJustifyH("LEFT")
 
-    -- 单击：打开世界地图并定位；Shift+单击：插入任务链接
+    -- 单击：打开世界地图并定位；Shift+单击：插入任务链接；右键：任务详情窗口
     row:SetScript("OnClick", function()
         local questid = row.questid
         if not questid then return end
+        if arg1 == "RightButton" then
+            PFEXQuestHelper.ShowQuestDetail(questid)
+            return
+        end
         if IsShiftKeyDown() then
             pfExtendCompat.InsertQuestLink(questid)
             return

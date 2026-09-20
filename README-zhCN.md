@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供怪物掉落显示和任务链可视化功能。兼容 **Turtle WoW**（1.12.0 客户端）。
+pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest) 的扩展插件，提供怪物掉落显示、任务链可视化、任务奖励查询等功能。兼容 **Turtle WoW**（1.12.0 客户端）。
 
 ## 功能特性
 
@@ -38,9 +38,9 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供
 
 ---
 
-### QuestHelper - 任务链浏览器
+### QuestHelper - 任务助手
 
-集成在世界地图中的强大任务链可视化工具。
+集成在世界地图中的强大任务链可视化工具，并提供任务奖励查询与任务详情查看。
 
 ![QuestHelper 浏览器](img/Snipaste_2026-02-10_17-50-45.jpg)
 
@@ -80,8 +80,29 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供
 **任务链导航：**
 - **可展开树**：点击 `+`/`-` 展开或折叠任务链
 - **双击**：一次展开/折叠整个子树
+- **自动展开**：打开列表时自动展开到当前正在进行中的任务
 - **自动滚动**：切换区域时自动滚动到相关任务
 - **持久标记**：任务标记保持显示直到手动移除
+
+**任务日志任务链：**
+- 任务日志中有后续任务的条目旁显示链条按钮，点击弹出该任务的后续环节查看窗口
+- 任务链窗口中：单击跳转到世界地图定位，Shift+单击插入任务链接到聊天框
+
+**任务奖励显示：**
+- 任务提示框（tooltip）中自动追加奖励信息：
+  - 经验值
+  - 满级金钱（数据来源仅提供满级折算金钱）
+  - 固定奖励物品 / 自选奖励物品（带品质颜色与数量）
+- 可在设置中开关（任务助手 → 任务提示中显示奖励）
+- 奖励数据覆盖 6000+ 任务（含全部乌龟服自定义任务），数据来源 [OctoWow Database](https://octowow.st/db/)
+
+**任务详情窗口：**
+- 在任务链列表或任务链窗口中**右键点击任务名称**打开详情窗口，显示：
+  - 任务标题（含等级，按难度着色）
+  - 任务目标与当前进度（已在任务日志中的任务显示实时进度）
+  - 完整描述文本
+  - 奖励：经验、满级金钱、物品图标列表（图标悬停查看物品详情，Shift+点击插入物品链接）
+- 窗口可随意拖动，Esc 关闭
 
 **高级功能：**
 - **前置查找器**：当前任务不可用时自动定位前置任务
@@ -94,7 +115,7 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供
 ## 依赖插件
 
 - **[pfQuest](https://github.com/shagu/pfQuest)** - 必需的数据库提供插件
-- **[pfQuest-turtle](https://github.com/shagu/pfQuest-turtle)** - Turtle WoW 的额外数据库（仅 Turtle WoW 需要）
+- **[pfQuest-turtle](https://github.com/shagu/pfQuest-turtle)** / **[pfQuest-octo](https://github.com/paokkerkir/pfQuest-octo)** - Turtle WoW 的额外数据库（仅 Turtle WoW 需要）
 - **[pfUI](https://github.com/shagu/pfUI)** - 推荐的 UI 框架（可选）
 
 ## 安装方法
@@ -120,15 +141,24 @@ pfExtend 是 [pfQuest](https://github.com/shagu/pfQuest)的扩展插件，提供
 
 ## 数据库更新
 
-两个功能都需要一次性数据库初始化：
+掉落显示与任务链功能需要一次性数据库初始化：
 - 安装后首次登录时自动更新
 - 可通过设置手动更新
 - pfQuest 数据库变更时需要更新
 
+任务奖励数据为插件内置文件（无需初始化），覆盖香草与乌龟服自定义任务。
+
+## 开发者说明
+
+`questGaindb/` 目录为任务奖励数据的抓取工作区（玩家无需使用）：
+- 内置 Python 抓取脚本，从 [OctoWow Database](https://octowow.st/db/) 批量获取任务奖励（物品/经验）
+- 重新生成数据：进入该目录运行 `python scrape.py all`，生成的数据文件会自动同步到插件目录
+- 详见 `questGaindb/README.md`
+
 ## 兼容性
 
 - **客户端**：魔兽世界 1.12.0（经典版），兼容 **Turtle WoW**
-- **依赖**：pfQuest（Turtle WoW 还需 pfQuest-turtle）、pfUI（可选）
+- **依赖**：pfQuest（Turtle WoW 还需 pfQuest-turtle 或 pfQuest-octo）、pfUI（可选）
 - **冲突**：无已知冲突
 
 ## 其它

@@ -1,9 +1,16 @@
-PfExtend_Database["ShowLoots"] = {
-    ["LootData"] = {},
-    ["itemQualityData"] = {},
-    ["updated"] = false,
-    ["version"] = nil
-};
+-- 仅在缺失时初始化，保留已存档的掉落库（否则每次登录都会触发全量重建）
+if type(PfExtend_Database["ShowLoots"]) ~= "table" then
+    PfExtend_Database["ShowLoots"] = {};
+end
+if type(PfExtend_Database["ShowLoots"]["LootData"]) ~= "table" then
+    PfExtend_Database["ShowLoots"]["LootData"] = {};
+end
+if type(PfExtend_Database["ShowLoots"]["itemQualityData"]) ~= "table" then
+    PfExtend_Database["ShowLoots"]["itemQualityData"] = {};
+end
+if PfExtend_Database["ShowLoots"]["updated"] == nil then
+    PfExtend_Database["ShowLoots"]["updated"] = false;
+end
 
 PFEXShowLoots = {
     LootListShown = {},
@@ -26,29 +33,36 @@ PFEXShowLoots.UpdateDatabase = function()
     end
     local db = { U = {}, O = {} }
     for itemId, itemData in pairs(pfDB["items"]["data"]) do
-        for lootType, LootData in pairs(itemData) do
-            for from, probability in pairs(LootData) do
-                if probability > 0 then
-                    if lootType == "U" or lootType == "O" then
-                        if db[lootType] == nil then
-                            db[lootType] = {};
-                        end
-                        if db[lootType][from] == nil then
-                            db[lootType][from] = {};
-                        end
+        -- 第三方数据包可能混入非表条目，跳过而不是中断整个重建
+        if type(itemData) == "table" then
+            for lootType, LootData in pairs(itemData) do
+                if type(LootData) == "table" then
+                    for from, probability in pairs(LootData) do
+                        if type(probability) == "number" and probability > 0 then
+                            if lootType == "U" or lootType == "O" then
+                                if db[lootType] == nil then
+                                    db[lootType] = {};
+                                end
+                                if db[lootType][from] == nil then
+                                    db[lootType][from] = {};
+                                end
 
-                        db[lootType][from][itemId] = probability;
-                    elseif lootType == "R" then
-                        if pfDB["refloot"]["data"][from] then
-                            for refLootType, refLootData in pairs(pfDB["refloot"]["data"][from]) do
-                                for refFrom, refProbability in pairs(refLootData) do
-                                    if db[refLootType] == nil then
-                                        db[refLootType] = {};
+                                db[lootType][from][itemId] = probability;
+                            elseif lootType == "R" then
+                                if type(pfDB["refloot"]["data"][from]) == "table" then
+                                    for refLootType, refLootData in pairs(pfDB["refloot"]["data"][from]) do
+                                        if type(refLootData) == "table" then
+                                            for refFrom, refProbability in pairs(refLootData) do
+                                                if db[refLootType] == nil then
+                                                    db[refLootType] = {};
+                                                end
+                                                if db[refLootType][refFrom] == nil then
+                                                    db[refLootType][refFrom] = {};
+                                                end
+                                                db[refLootType][refFrom][itemId] = probability;
+                                            end
+                                        end
                                     end
-                                    if db[refLootType][refFrom] == nil then
-                                        db[refLootType][refFrom] = {};
-                                    end
-                                    db[refLootType][refFrom][itemId] = probability;
                                 end
                             end
                         end

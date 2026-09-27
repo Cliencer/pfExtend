@@ -112,6 +112,7 @@ PFEXQuestHelper.QuestFilter = function(id)
     }
 
     if not quests[id] then ret.UNKNOWN = true return ret end
+    if type(quests[id]) ~= "table" then ret.UNKNOWN = true return ret end
 
     if quests[id]["lvl"] then ret.lvl = quests[id]["lvl"] end
     if quests[id]["min"] then ret.min = quests[id]["min"] end
@@ -222,6 +223,7 @@ end
 
 PFEXQuestHelper.GetStartZones = function(id)
     local ret = {}
+    if type(quests[id]) ~= "table" then return ret end
     if quests[id]["start"] then
         if quests[id]["start"]["U"] then
             for _, unit in pairs(quests[id]["start"]["U"]) do
@@ -239,25 +241,30 @@ PFEXQuestHelper.GetStartZones = function(id)
         end
         if quests[id]["start"]["I"] then
             for _, item in pairs(quests[id]["start"]["I"]) do --V,U,O,R
-                if items[item] then
+                if type(items[item]) == "table" then
                     for lootType, lootSources in pairs(items[item]) do
-                        if lootType == "R" then
-                            for id, chance in pairs(lootSources) do
-                                if refloot[id] then
-                                    for refLootType, refLootSources in pairs(refloot[id]) do
-                                        for refId, _ in pairs(refLootSources) do
-                                            for _, v in ipairs(PFEXQuestHelper.ReadCoords(refId, refLootType)) do
-                                                table.insert(ret, v)
+                        -- 第三方数据包可能混入非表条目，跳过而不是中断
+                        if type(lootSources) == "table" then
+                            if lootType == "R" then
+                                for id, chance in pairs(lootSources) do
+                                    if type(refloot[id]) == "table" then
+                                        for refLootType, refLootSources in pairs(refloot[id]) do
+                                            if type(refLootSources) == "table" then
+                                                for refId, _ in pairs(refLootSources) do
+                                                    for _, v in ipairs(PFEXQuestHelper.ReadCoords(refId, refLootType)) do
+                                                        table.insert(ret, v)
+                                                    end
+                                                end
                                             end
                                         end
                                     end
                                 end
                             end
-                        end
-                        if lootType == "V" or lootType == "U" or lootType == "O" then
-                            for id, chance in pairs(lootSources) do
-                                for _, v in ipairs(PFEXQuestHelper.ReadCoords(id, lootType)) do
-                                    table.insert(ret, v)
+                            if lootType == "V" or lootType == "U" or lootType == "O" then
+                                for id, chance in pairs(lootSources) do
+                                    for _, v in ipairs(PFEXQuestHelper.ReadCoords(id, lootType)) do
+                                        table.insert(ret, v)
+                                    end
                                 end
                             end
                         end
@@ -276,21 +283,24 @@ PFEXQuestHelper.UpdateDatabase = function()
     end
 
     for questId, data in pairs(quests) do
-        local questInWhatZone = PFEXQuestHelper.GetStartZones(questId)
-        local multiNum = table.getn(questInWhatZone);
-        PfExtend_Database["QuestHelper"]["QuestZoneData"][questId] = questInWhatZone;
-        for _, zone in pairs(questInWhatZone) do
-            if PfExtend_Database["QuestHelper"]["ZoneQuestData"][zone] == nil then
-                PfExtend_Database["QuestHelper"]["ZoneQuestData"][zone] = {}
+        -- 跳过数据包中的损坏条目（非表数据）
+        if type(data) == "table" then
+            local questInWhatZone = PFEXQuestHelper.GetStartZones(questId)
+            local multiNum = table.getn(questInWhatZone);
+            PfExtend_Database["QuestHelper"]["QuestZoneData"][questId] = questInWhatZone;
+            for _, zone in pairs(questInWhatZone) do
+                if PfExtend_Database["QuestHelper"]["ZoneQuestData"][zone] == nil then
+                    PfExtend_Database["QuestHelper"]["ZoneQuestData"][zone] = {}
+                end
+                PfExtend_Database["QuestHelper"]["ZoneQuestData"][zone][questId] = multiNum;
             end
-            PfExtend_Database["QuestHelper"]["ZoneQuestData"][zone][questId] = multiNum;
-        end
-        if PfExtend_Database["QuestHelper"]["QuestAfter"][questId] == nil then PfExtend_Database["QuestHelper"]["QuestAfter"][questId] = {} end
-        if data["pre"] then
-            for _, pre in pairs(data["pre"]) do
-                if PfExtend_Database["QuestHelper"]["QuestAfter"][pre] == nil then PfExtend_Database["QuestHelper"]["QuestAfter"][pre] = {} end
-                if not table.contain(PfExtend_Database["QuestHelper"]["QuestAfter"][pre], questId) then
-                    table.insert(PfExtend_Database["QuestHelper"]["QuestAfter"][pre], questId)
+            if PfExtend_Database["QuestHelper"]["QuestAfter"][questId] == nil then PfExtend_Database["QuestHelper"]["QuestAfter"][questId] = {} end
+            if data["pre"] then
+                for _, pre in pairs(data["pre"]) do
+                    if PfExtend_Database["QuestHelper"]["QuestAfter"][pre] == nil then PfExtend_Database["QuestHelper"]["QuestAfter"][pre] = {} end
+                    if not table.contain(PfExtend_Database["QuestHelper"]["QuestAfter"][pre], questId) then
+                        table.insert(PfExtend_Database["QuestHelper"]["QuestAfter"][pre], questId)
+                    end
                 end
             end
         end

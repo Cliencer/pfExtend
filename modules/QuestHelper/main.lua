@@ -572,11 +572,12 @@ function PFEXQuestHelper.QuestChainBuilder(questList)
 end
 
 -- 任务日志指纹（接取/放弃任务会改变）
+-- 注意：数据包无法识别的任务会被pfQuest以标题字符串作为键，需降级处理
 local function GetQuestLogFingerprint()
     local count, sum = 0, 0
     for id in pairs(pfQuest.questlog) do
         count = count + 1
-        sum = sum + id
+        sum = sum + (tonumber(id) or 0)
     end
     return count .. ":" .. sum
 end

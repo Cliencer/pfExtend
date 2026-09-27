@@ -39,7 +39,7 @@ jobs:
         
         # Define excluded files and folders
         $excludedFiles = @('.gitattributes', '.gitignore', 'LICENSE', 'README.md', 'README-zhCN.md')
-        $excludedFolders = @('img', '.git', '.github')
+        $excludedFolders = @('img', '.git', '.github','questGaindb')
         
         # Create temp folder structure: temp_pfExtend/pfExtend/
         $tempDir = "temp_pfExtend"
